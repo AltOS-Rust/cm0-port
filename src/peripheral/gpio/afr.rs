@@ -75,33 +75,6 @@ pub struct AFRL(u32);
 #[derive(Debug)]
 pub struct AFRH(u32);
 
-impl AlternateFunctionControl {
-    pub fn new(base_addr: *const u32) -> Self {
-        AlternateFunctionControl {
-            afrl: AFRL::new(base_addr),
-            afrh: AFRH::new(base_addr),
-        }
-    }
-
-    pub fn set_function(&mut self, function: AlternateFunction, port: u8) {
-        if port < 8 {
-            self.afrl.set_function(function, port);
-        }
-        else {
-            self.afrh.set_function(function, port);
-        }
-    }
-
-    pub fn get_function(&self, port: u8) -> AlternateFunction {
-        if port < 8 {
-            self.afrl.get_function(port)
-        }
-        else {
-            self.afrh.get_function(port)
-        }
-    }
-}
-
 #[derive(Copy, Clone)]
 struct AFRL(u32);
 

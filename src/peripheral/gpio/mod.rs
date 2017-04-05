@@ -205,11 +205,21 @@ impl RawGPIO {
 
     /// Set the GPIO function type.
     fn set_function(&mut self, function: AlternateFunction, port: u8) {
-        self.afr.set_function(function, port);
+        if port < 8 {
+            self.afrl.set_function(function, port);
+        }
+        else {
+            self.afrh.set_function(function, port);
+        }
     }
 
     /// Get the GPIO function type.
     fn get_function(&self, port: u8) -> AlternateFunction {
-        self. afr.get_function(port)
+        if port < 8 {
+            self.afrl.get_function(port)
+        }
+        else {
+            self.afrh.get_function(port)
+        }
     }
 }
