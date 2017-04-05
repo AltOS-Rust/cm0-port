@@ -55,7 +55,7 @@ pub enum Group {
 }
 
 /// A GPIO contains the base address for a memory mapped GPIO group associated with it.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 #[repr(C)]
 #[doc(hidden)]
 pub struct RawGPIO {
@@ -72,7 +72,7 @@ pub struct RawGPIO {
     brr: u32,
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct GPIO(Volatile<RawGPIO>);
 
 impl GPIO {
@@ -86,7 +86,7 @@ impl GPIO {
     }
 
     fn new(mem_addr: *const u32) -> GPIO {
-        GPIO(Volatile::new(mem_addr))
+        GPIO(Volatile::new(mem_addr as *const _))
     }
 }
 

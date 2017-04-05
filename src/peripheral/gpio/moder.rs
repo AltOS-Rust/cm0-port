@@ -54,7 +54,7 @@ impl Mode {
     }
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct MODER(u32);
 
 impl MODER {

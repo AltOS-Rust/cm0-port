@@ -50,7 +50,7 @@ impl Pull {
     }
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct PUPDR(u32);
 
 impl PUPDR {

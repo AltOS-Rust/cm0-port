@@ -46,7 +46,7 @@ impl Type {
     }
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct OTYPER(u32);
 
 impl OTYPER {

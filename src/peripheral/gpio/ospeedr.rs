@@ -51,7 +51,7 @@ impl Speed {
     }
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct OSPEEDR(u32);
 
 impl OSPEEDR {
