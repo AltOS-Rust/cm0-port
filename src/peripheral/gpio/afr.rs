@@ -65,24 +65,10 @@ impl AlternateFunction {
     }
 }
 
-// #[derive(Copy, Clone)]
-// pub struct AlternateFunctionControl {
-//     afrl: AFRL,
-//     afrh: AFRH,
-// }
-#[derive(Debug)]
-pub struct AFRL(u32);
-#[derive(Debug)]
-pub struct AFRH(u32);
-
 #[derive(Copy, Clone)]
 struct AFRL(u32);
-
 impl AFRL {
     fn set_function(&mut self, function: AlternateFunction, port: u8) {
-        if port > 8 {
-            panic!("AFRL::set_function - specified port must be between [0..7]!");
-        }
         let mask = function.mask();
 
         self.0 &= !(AFR_MASK << (port * 4));
@@ -90,10 +76,6 @@ impl AFRL {
     }
 
     fn get_function(&self, port: u8) -> AlternateFunction {
-        if port > 8 {
-            panic!("AFRL::get_function - specified port must be between [0..7]!");
-        }
-
         let mask = self.0 & (AFR_MASK << (port * 4))
 
         AlternateFunction::from_mask(mask)
@@ -102,12 +84,8 @@ impl AFRL {
 
 #[derive(Copy, Clone)]
 struct AFRH(u32);
-
 impl AFRH {
     fn set_function(&mut self, function: AlternateFunction, port: u8) {
-        if port > 15 || port < 8 {
-            panic!("AFRH::set_function - specified port must be between [8..15]!");
-        }
         let mask = function.mask();
 
         // #9: Port needs to be subtracted by 8 since afr registers are split into high and low
@@ -119,10 +97,6 @@ impl AFRH {
     }
 
     fn get_function(&self, port: u8) -> AlternateFunction {
-        if port > 15 || port < 8 {
-            panic!("AFRL::get_function - specified port must be between [8..15]!");
-        }
-
         // #9: See comment in `set_function`
         let port = port - 8;
         self.0 & (AFR_MASK << (port * 4))

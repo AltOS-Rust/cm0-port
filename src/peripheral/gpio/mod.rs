@@ -35,7 +35,9 @@ pub use self::moder::{Mode, MODER};
 pub use self::otyper::{Type, OTYPER};
 pub use self::ospeedr::{Speed, OSPEEDR};
 pub use self::pupdr::{Pull, PUPDR};
-pub use self::afr::{AFRL, AFRH};
+pub use self::afr::AlternateFunction;
+
+use self::afr::{AFRL, AFRH};
 
 /// An IO group containing up to 16 pins. For some reason, the datasheet shows the memory
 /// for groups D and E as reserved, so for now they are left out.
@@ -60,13 +62,13 @@ pub struct RawGPIO {
     otyper: OTYPER,
     ospeedr: OSPEEDR,
     pupdr: PUPDR,
-    idr: IDR,
-    odr: ODR,
+    idr: u32,
+    odr: u32,
     bsrr: BSRR,
-    lckr: LCKR,
+    lckr: u32,
     afrl: AFRL,
     afrh: AFRH,
-    brr: BRR,
+    brr: u32,
 }
 
 #[derive(Debug)]
@@ -204,22 +206,28 @@ impl RawGPIO {
     }
 
     /// Set the GPIO function type.
+    ///
+    /// # Panics
+    ///
+    /// Port must be a value between [0..15] or the kernel will panic.
     fn set_function(&mut self, function: AlternateFunction, port: u8) {
-        if port < 8 {
-            self.afrl.set_function(function, port);
-        }
-        else {
-            self.afrh.set_function(function, port);
+        match port {
+            0..7 => self.afrl.set_function(function, port),
+            8..15 => self.afrh.set_function(function, port),
+            _ => panic!("AFRL/AFRH::set_function - specified port must be between [0..15]!"),
         }
     }
 
     /// Get the GPIO function type.
+    ///
+    /// # Panics
+    ///
+    /// Port must be a value between [0..15] or the kernel will panic.
     fn get_function(&self, port: u8) -> AlternateFunction {
-        if port < 8 {
-            self.afrl.get_function(port)
-        }
-        else {
-            self.afrh.get_function(port)
+        match port {
+            0..7 => self.afrl.set_function(function, port),
+            8..15 => self.afrh.set_function(function, port),
+            _ => panic!("AFRL/AFRH::set_function - specified port must be between [0..15]!"),
         }
     }
 }
