@@ -69,6 +69,9 @@ impl AlternateFunction {
 pub struct AFRL(u32);
 impl AFRL {
     pub fn set_function(&mut self, function: AlternateFunction, port: u8) {
+        if port > 8 {
+            panic!("AFRL::set_function - specified port must be between [0..7]!");
+        }
         let mask = function.mask();
 
         self.0 &= !(AFR_MASK << (port * 4));
@@ -76,6 +79,9 @@ impl AFRL {
     }
 
     pub fn get_function(&self, port: u8) -> AlternateFunction {
+        if port > 8 {
+            panic!("AFRL::set_function - specified port must be between [0..7]!");
+        }
         let mask = self.0 & (AFR_MASK << (port * 4));
 
         AlternateFunction::from_mask(mask)
@@ -86,6 +92,9 @@ impl AFRL {
 pub struct AFRH(u32);
 impl AFRH {
     pub fn set_function(&mut self, function: AlternateFunction, port: u8) {
+        if port > 15 || port < 8 {
+            panic!("AFRH::set_function - specified port must be between [8..15]!");
+        }
         let mask = function.mask();
 
         // #9: Port needs to be subtracted by 8 since afr registers are split into high and low
@@ -97,6 +106,9 @@ impl AFRH {
     }
 
     pub fn get_function(&self, port: u8) -> AlternateFunction {
+        if port > 15 || port < 8 {
+            panic!("AFRH::get_function - specified port must be between [8..15]!");
+        }
         // #9: See comment in `set_function`
         let port = port - 8;
         let mask = self.0 & (AFR_MASK << (port * 4));
@@ -111,21 +123,6 @@ mod tests {
     use test;
 
     #[test]
-    fn test_afrh_set_function() {
-        let mut afrh = AFRH(0);
-        afrh.set_function(AlternateFunction::Five, 8);
-
-        assert_eq!(afrh.0, 0x5);
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_afrh_set_port_out_of_bounds_panics() {
-        let mut afrh = AFRH(0);
-        afrh.set_function(AlternateFunction::Seven, 2);
-    }
-
-    #[test]
     fn test_afrl_set_function() {
         let mut afrl = AFRL(0);
         afrl.set_function(AlternateFunction::Two, 3);
@@ -138,5 +135,20 @@ mod tests {
     fn test_afrl_set_port_out_of_bounds_panics() {
         let mut afrl = AFRL(0);
         afrl.set_function(AlternateFunction::Two, 10);
+    }
+
+    #[test]
+    fn test_afrh_set_function() {
+        let mut afrh = AFRH(0);
+        afrh.set_function(AlternateFunction::Five, 8);
+
+        assert_eq!(afrh.0, 0x5);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_afrh_set_port_out_of_bounds_panics() {
+        let mut afrh = AFRH(0);
+        afrh.set_function(AlternateFunction::Seven, 2);
     }
 }
