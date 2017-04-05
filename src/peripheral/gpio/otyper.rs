@@ -46,7 +46,7 @@ impl Type {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug)]
 pub struct OTYPER(u32);
 
 impl OTYPER {
@@ -66,7 +66,7 @@ impl OTYPER {
             panic!("OTYPER::get_type - specified port must be between [0..15]!");
         }
 
-        let mask = (self.0 & (0b1 << port)) >> port
+        let mask = (self.0 & (0b1 << port)) >> port;
 
         Type::from_mask(mask)
     }

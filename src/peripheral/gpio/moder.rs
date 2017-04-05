@@ -54,7 +54,7 @@ impl Mode {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug)]
 pub struct MODER(u32);
 
 impl MODER {
@@ -75,7 +75,7 @@ impl MODER {
             panic!("MODER::get_mode - specified port must be a value between [0..15]!");
         }
 
-        let mask = (self.0 & (MODE_MASK << (port * 2))) >> (port * 2)
+        let mask = (self.0 & (MODE_MASK << (port * 2))) >> (port * 2);
 
         Mode::from_mask(mask)
     }

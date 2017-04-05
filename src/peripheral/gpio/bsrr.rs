@@ -18,7 +18,7 @@
 use super::super::Register;
 use super::defs::*;
 
-#[derive(Copy, Clone)]
+#[derive(Debug)]
 pub struct BSRR(u32);
 
 impl BSRR {

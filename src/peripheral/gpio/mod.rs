@@ -35,6 +35,7 @@ pub use self::moder::{Mode, MODER};
 pub use self::otyper::{Type, OTYPER};
 pub use self::ospeedr::{Speed, OSPEEDR};
 pub use self::pupdr::{Pull, PUPDR};
+pub use self::bsrr::BSRR;
 pub use self::afr::AlternateFunction;
 
 use self::afr::{AFRL, AFRH};
@@ -92,7 +93,7 @@ impl GPIO {
 impl Deref for GPIO {
     type Target = RawGPIO;
 
-    fn deref(&self) -> Self::Target {
+    fn deref(&self) -> &Self::Target {
         &*(self.0)
     }
 }
@@ -212,8 +213,8 @@ impl RawGPIO {
     /// Port must be a value between [0..15] or the kernel will panic.
     fn set_function(&mut self, function: AlternateFunction, port: u8) {
         match port {
-            0..7 => self.afrl.set_function(function, port),
-            8..15 => self.afrh.set_function(function, port),
+            0...7 => self.afrl.set_function(function, port),
+            8...15 => self.afrh.set_function(function, port),
             _ => panic!("AFRL/AFRH::set_function - specified port must be between [0..15]!"),
         }
     }
@@ -225,8 +226,8 @@ impl RawGPIO {
     /// Port must be a value between [0..15] or the kernel will panic.
     fn get_function(&self, port: u8) -> AlternateFunction {
         match port {
-            0..7 => self.afrl.set_function(function, port),
-            8..15 => self.afrh.set_function(function, port),
+            0...7 => self.afrl.get_function(port),
+            8...15 => self.afrh.get_function(port),
             _ => panic!("AFRL/AFRH::set_function - specified port must be between [0..15]!"),
         }
     }

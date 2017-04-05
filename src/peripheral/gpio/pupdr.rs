@@ -50,7 +50,7 @@ impl Pull {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug)]
 pub struct PUPDR(u32);
 
 impl PUPDR {
@@ -69,7 +69,7 @@ impl PUPDR {
             panic!("PUPDR::get_pull - specified port must be between [0..15]!");
         }
 
-        let mask = (self.0 & (PUPD_MASK << (port * 2))) >> (port * 2)
+        let mask = (self.0 & (PUPD_MASK << (port * 2))) >> (port * 2);
 
         Pull::from_mask(mask)
     }

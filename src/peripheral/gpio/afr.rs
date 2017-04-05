@@ -65,8 +65,8 @@ impl AlternateFunction {
     }
 }
 
-#[derive(Copy, Clone)]
-struct AFRL(u32);
+#[derive(Debug)]
+pub struct AFRL(u32);
 impl AFRL {
     fn set_function(&mut self, function: AlternateFunction, port: u8) {
         let mask = function.mask();
@@ -76,14 +76,14 @@ impl AFRL {
     }
 
     fn get_function(&self, port: u8) -> AlternateFunction {
-        let mask = self.0 & (AFR_MASK << (port * 4))
+        let mask = self.0 & (AFR_MASK << (port * 4));
 
         AlternateFunction::from_mask(mask)
     }
 }
 
-#[derive(Copy, Clone)]
-struct AFRH(u32);
+#[derive(Debug)]
+pub struct AFRH(u32);
 impl AFRH {
     fn set_function(&mut self, function: AlternateFunction, port: u8) {
         let mask = function.mask();
@@ -99,7 +99,7 @@ impl AFRH {
     fn get_function(&self, port: u8) -> AlternateFunction {
         // #9: See comment in `set_function`
         let port = port - 8;
-        self.0 & (AFR_MASK << (port * 4))
+        let mask = self.0 & (AFR_MASK << (port * 4));
 
         AlternateFunction::from_mask(mask)
     }

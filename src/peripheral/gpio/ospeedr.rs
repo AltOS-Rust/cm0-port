@@ -51,7 +51,7 @@ impl Speed {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug)]
 pub struct OSPEEDR(u32);
 
 impl OSPEEDR {
@@ -70,7 +70,7 @@ impl OSPEEDR {
             panic!("OSPEEDR::get_speed - specified port must be between [0..15]!");
         }
 
-        let mask = (self.0 & (SPEED_MASK << (port * 2))) >> (port * 2)
+        let mask = (self.0 & (SPEED_MASK << (port * 2))) >> (port * 2);
 
         Speed::from_mask(mask)
     }
