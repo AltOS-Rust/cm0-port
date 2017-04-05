@@ -15,40 +15,46 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Defines all the perpherials that have interrupts.
-#[allow(missing_docs)]
-#[derive(Copy, Clone)]
-pub enum Hardware {
-    WWDG = 0,
-    PVDVDDIO2 = 1,
-    RTC = 2,
-    FLASH = 3,
-    RCCCRS = 4,
-    EXTI01 = 5,
-    EXTI23 = 6,
-    EXTI415 = 7,
-    TSC = 8,
-    DMACH1 = 9,
-    DMACH23 = 10,
-    DMACH4PLUS = 11,
-    ADCCOMP = 12,
-    TIM1BRKUP = 13,
-    TIM1CC = 14,
-    TIM2 = 15,
-    TIM3 = 16,
-    TIM6 = 17,
-    TIM7 = 18,
-    TIM14 = 19,
-    TIM15 = 20,
-    TIM16 = 21,
-    TIM17 = 22,
-    I2C1 = 23,
-    I2C2 = 24,
-    SPI1 = 25,
-    SPI2 = 26,
-    USART1 = 27,
-    USART2 = 28,
-    USART3PLUS = 29,
-    CECCAN = 30,
-    USB = 31,
-}
+pub const NVIC_ADDR: *const u32 = 0xE000E100 as *const _;
+
+// Interrupt Numbers
+pub const NVIC_WWDG_INT: isize = 0;
+pub const NVIC_PVDVDDIO2_INT: isize = 1;
+pub const NVIC_RTC_INT: isize = 2;
+pub const NVIC_FLASH_INT: isize = 3;
+pub const NVIC_RCCCRS_INT: isize = 4;
+pub const NVIC_EXTI01_INT: isize = 5;
+pub const NVIC_EXTI23_INT: isize = 6;
+pub const NVIC_EXTI415_INT: isize = 7;
+pub const NVIC_TSC_INT: isize = 8;
+pub const NVIC_DMACH1_INT: isize = 9;
+pub const NVIC_DMACH23_INT: isize = 10;
+pub const NVIC_DMACH4PLUS_INT: isize = 11;
+pub const NVIC_ADCCOMP_INT: isize = 12;
+pub const NVIC_TIM1BRKUP_INT: isize = 13;
+pub const NVIC_TIM1CC_INT: isize = 14;
+pub const NVIC_TIM2_INT: isize = 15;
+pub const NVIC_TIM3_INT: isize = 16;
+pub const NVIC_TIM6_INT: isize = 17;
+pub const NVIC_TIM7_INT: isize = 18;
+pub const NVIC_TIM14_INT: isize = 19;
+pub const NVIC_TIM15_INT: isize = 20;
+pub const NVIC_TIM16_INT: isize = 21;
+pub const NVIC_TIM17_INT: isize = 22;
+pub const NVIC_I2C1_INT: isize = 23;
+pub const NVIC_I2C2_INT: isize = 24;
+pub const NVIC_SPI1_INT: isize = 25;
+pub const NVIC_SPI2_INT: isize = 26;
+pub const NVIC_USART1_INT: isize = 27;
+pub const NVIC_USART2_INT: isize = 28;
+pub const NVIC_USART3PLUS_INT: isize = 29;
+pub const NVIC_CECCAN_INT: isize = 30;
+pub const NVIC_USB_INT: isize = 31;
+
+// IPR
+pub const IPR_PRIORITY_FIELD_MASK: u32 = 0b11 << 6;
+
+pub const IPR_PRIORITY_HIGHEST: u32 = 0b00 << 6;
+pub const IPR_PRIORITY_HIGH: u32 = 0b01 << 6;
+pub const IPR_PRIORITY_LOW: u32 = 0b10 << 6;
+pub const IPR_PRIORITY_LOWEST: u32 = 0b11 << 6;

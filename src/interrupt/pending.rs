@@ -15,98 +15,60 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-use peripheral::Register;
-use interrupt::defs::Hardware;
+use interrupt::Hardware;
 
-#[derive(Copy, Clone)]
-pub struct PendingControl {
-    ispr: ISPR,
-    icpr: ICPR,
-}
+#[derive(Copy, Clone, Debug)]
+pub struct ISPR(u32);
+#[derive(Copy, Clone, Debug)]
+pub struct ICPR(u32);
 
-impl PendingControl {
-    pub fn new(base_addr: *const u32) -> Self {
-        PendingControl {
-            ispr: ISPR::new(base_addr),
-            icpr: ICPR::new(base_addr),
-        }
-    }
-
+impl ISPR {
     pub fn set_pending(&mut self, hardware: Hardware) {
-        self.ispr.set_pending(hardware);
-    }
+        let interrupt = hardware as u8;
 
-    pub fn clear_pending(&mut self, hardware: Hardware) {
-        self.icpr.clear_pending(hardware);
+        self.0 |= 0b1 << interrupt;
     }
 
     pub fn interrupt_is_pending(&self, hardware: Hardware) -> bool {
-        self.ispr.interrupt_is_pending(hardware)
-    }
-}
-
-#[derive(Copy, Clone)]
-struct ISPR {
-    base_addr: *const u32,
-}
-
-impl Register for ISPR {
-    fn new(base_addr: *const u32) -> Self {
-        ISPR { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        0x100
-    }
-}
-
-impl ISPR {
-    fn set_pending(&mut self, hardware: Hardware) {
         let interrupt = hardware as u8;
-        unsafe {
-            let mut reg = self.addr();
-            *reg |= 0b1 << interrupt;
-        }
-    }
 
-    fn interrupt_is_pending(&self, hardware: Hardware) -> bool {
-        let interrupt = hardware as u8;
-        unsafe {
-            let reg = self.addr();
-            (*reg & (0b1 << interrupt)) != 0
-        }
-    }
-}
-
-#[derive(Copy, Clone)]
-struct ICPR {
-    base_addr: *const u32,
-}
-
-impl Register for ICPR {
-    fn new(base_addr: *const u32) -> Self {
-        ICPR { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        0x180
+        self.0 & (0b1 << interrupt) != 0
     }
 }
 
 impl ICPR {
-    fn clear_pending(&mut self, hardware: Hardware) {
+    pub fn clear_pending(&mut self, hardware: Hardware) {
         let interrupt = hardware as u8;
-        unsafe {
-            let mut reg = self.addr();
-            *reg |= 0b1 << interrupt;
-        }
+
+        self.0 |= 0b1 << interrupt;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ispr_set_pending() {
+        let mut ispr = ISPR(0);
+
+        ispr.set_pending(Hardware::Flash);
+        assert_eq!(ispr.0, 0b1 << 3);
+    }
+
+    #[test]
+    fn test_ispr_interrupt_is_pending() {
+        let ispr = ISPR(0b1 << 5);
+
+        assert!(ispr.interrupt_is_pending(Hardware::Exti01));
+        assert!(!ispr.interrupt_is_pending(Hardware::Usb));
+    }
+
+    #[test]
+    fn test_icpr_clear_pending() {
+        let mut icpr = ICPR(0);
+
+        icpr.clear_pending(Hardware::Flash);
+        assert_eq!(icpr.0, 0b1 << 3);
     }
 }

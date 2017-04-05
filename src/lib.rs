@@ -44,11 +44,12 @@ extern crate volatile_ptr as volatile;
 #[cfg(test)]
 mod test;
 
+#[macro_use]
+pub mod peripheral;
 pub mod io;
 pub mod exceptions;
 pub mod interrupt;
 pub mod system_control;
-pub mod peripheral;
 pub mod time;
 
 use peripheral::gpio;

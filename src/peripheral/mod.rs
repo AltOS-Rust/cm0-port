@@ -26,6 +26,24 @@ pub mod usart;
 
 use volatile::Volatile;
 
+#[macro_export]
+macro_rules! pad_field {
+    ($name:ident[$N:expr]) => {
+        struct $name([u8; $N]);
+        impl Clone for $name {
+            fn clone(&self) -> $name {
+                $name(self.0)
+            }
+        }
+        impl Copy for $name {}
+        impl ::core::fmt::Debug for $name {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+                write!(f, "Padding {{ {} bytes }}", self.0.len())
+            }
+        }
+    }
+}
+
 /// Defines the base address for a block of Control registers for a given peripheral.
 pub trait Control {
     /// Base address for the given peripheral.
