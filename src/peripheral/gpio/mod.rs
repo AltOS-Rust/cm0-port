@@ -30,14 +30,19 @@ use core::ops::{Deref, DerefMut};
 use volatile::Volatile;
 use super::rcc;
 use self::defs::*;
+
 pub use self::port::Port;
-pub use self::moder::{Mode, MODER};
-pub use self::otyper::{Type, OTYPER};
-pub use self::ospeedr::{Speed, OSPEEDR};
-pub use self::pupdr::{Pull, PUPDR};
-pub use self::bsrr::BSRR;
+pub use self::moder::Mode;
+pub use self::otyper::Type;
+pub use self::ospeedr::Speed;
+pub use self::pupdr::Pull;
 pub use self::afr::AlternateFunction;
 
+use self::moder::MODER;
+use self::otyper::OTYPER;
+use self::ospeedr::OSPEEDR;
+use self::pupdr::PUPDR;
+use self::bsrr::BSRR;
 use self::afr::{AFRL, AFRH};
 
 /// An IO group containing up to 16 pins. For some reason, the datasheet shows the memory
