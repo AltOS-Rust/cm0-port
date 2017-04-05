@@ -20,7 +20,6 @@
  * baud rate based on what the user needs.
  */
 
-use super::super::Register;
 use super::defs::*;
 
 /// Five most common baud rates available.
@@ -34,24 +33,8 @@ pub enum BaudRate {
     Hz115200,
 }
 
-#[derive(Copy, Clone, Debug)]
-pub struct BRR {
-    base_addr: *const u32,
-}
-
-impl Register for BRR {
-    fn new(base_addr: *const u32) -> Self {
-        BRR { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        BRR_OFFSET
-    }
-}
+#[derive(Debug)]
+pub struct BRR(u32);
 
 impl BRR {
     /* Bits 31:16 Reserved, must be kept at reset value.
@@ -79,9 +62,6 @@ impl BRR {
             rate |= low_bits;
         }
 
-        unsafe {
-            let mut reg = self.addr();
-            reg.store(rate);
-        }
+        self.0 = rate;
     }
 }
