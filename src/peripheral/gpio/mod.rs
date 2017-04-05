@@ -77,6 +77,10 @@ pub struct RawGPIO {
     brr: u32,
 }
 
+/// Creates struct for accessing the GPIO groups.
+///
+/// Has a RawGPIO data member in order to access each register for the
+/// GPIO peripheral.
 #[derive(Copy, Clone, Debug)]
 pub struct GPIO(Volatile<RawGPIO>);
 
@@ -96,6 +100,7 @@ impl GPIO {
         }
     }
 
+    /// Wrapper for enabling a GPIO group.
     pub fn enable(group: Group) {
         RawGPIO::enable(group);
     }
