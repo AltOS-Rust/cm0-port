@@ -15,7 +15,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-use super::super::{Register, Field};
+use super::super::Field;
 use super::defs::*;
 
 /// Defines the behavior of the GPIO pin when not asserted.

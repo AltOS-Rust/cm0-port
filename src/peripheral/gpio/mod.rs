@@ -86,7 +86,13 @@ impl GPIO {
     }
 
     fn new(mem_addr: *const u32) -> GPIO {
-        GPIO(Volatile::new(mem_addr as *const _))
+        unsafe {
+            GPIO(Volatile::new(mem_addr as *const _))
+        }
+    }
+
+    pub fn enable(group: Group) {
+        RawGPIO::enable(group);
     }
 }
 

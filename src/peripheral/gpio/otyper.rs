@@ -15,7 +15,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-use super::super::{Register, Field};
+use super::super::Field;
 use super::defs::*;
 
 /// Available GPIO pin types.
