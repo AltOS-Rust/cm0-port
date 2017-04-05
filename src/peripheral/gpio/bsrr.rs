@@ -19,23 +19,7 @@ use super::super::Register;
 use super::defs::*;
 
 #[derive(Copy, Clone)]
-pub struct BSRR {
-    base_addr: *const u32,
-}
-
-impl Register for BSRR {
-    fn new(base_addr: *const u32) -> Self {
-        BSRR { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        BSRR_OFFSET
-    }
-}
+pub struct BSRR(u32);
 
 impl BSRR {
     /// Set the bit high for the specified port, port must be a value between [0..15] or the kernel
@@ -44,21 +28,13 @@ impl BSRR {
         if port > 15 {
             panic!("BSRR::set - specified port must be between [0..15]!");
         }
-
-        unsafe {
-            let mut reg = self.addr();
-            *reg |= 0b1 << port;
-        }
+        self.0 |= 0b1 << port;
     }
 
     pub fn reset(&mut self, port: u8) {
         if port > 15 {
             panic!("BSRR::reset - specified port must be between [0..15]!");
         }
-
-        unsafe {
-            let mut reg = self.addr();
-            *reg |= 0b1 << (port + BSRR_RESET_OFFSET);
-        }
+        self.0 |= 0b1 << (port + BSRR_RESET_OFFSET);
     }
 }

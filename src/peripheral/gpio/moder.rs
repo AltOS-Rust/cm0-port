@@ -55,23 +55,7 @@ impl Mode {
 }
 
 #[derive(Copy, Clone)]
-pub struct MODER {
-    base_addr: *const u32,
-}
-
-impl Register for MODER {
-    fn new(base_addr: *const u32) -> Self {
-        MODER { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        0x0
-    }
-}
+pub struct MODER(u32);
 
 impl MODER {
     pub fn set_mode(&mut self, mode: Mode, port: u8) {
@@ -80,12 +64,8 @@ impl MODER {
         }
         let mask = mode.mask();
 
-        unsafe {
-            let mut reg = self.addr();
-            // Zero the field first
-            *reg &= !(MODE_MASK << (port * 2));
-            *reg |= mask << (port * 2);
-        }
+        self.0 &= !(MODE_MASK << (port * 2));
+        self.0 |= mask << (port * 2);
     }
 
     /// Get the current mode for the specified port, port must be a value between [0..15] or
@@ -95,11 +75,8 @@ impl MODER {
             panic!("MODER::get_mode - specified port must be a value between [0..15]!");
         }
 
-        let mask = unsafe {
-            let reg = self.addr();
+        let mask = (self.0 & (MODE_MASK << (port * 2))) >> (port * 2)
 
-            (*reg & (MODE_MASK << (port * 2))) >> (port * 2)
-        };
         Mode::from_mask(mask)
     }
 }

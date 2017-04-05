@@ -52,23 +52,7 @@ impl Speed {
 }
 
 #[derive(Copy, Clone)]
-pub struct OSPEEDR {
-    base_addr: *const u32,
-}
-
-impl Register for OSPEEDR {
-    fn new(base_addr: *const u32) -> Self {
-        OSPEEDR { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        OSPEEDR_OFFSET
-    }
-}
+pub struct OSPEEDR(u32);
 
 impl OSPEEDR {
     pub fn set_speed(&mut self, speed: Speed, port: u8) {
@@ -77,11 +61,8 @@ impl OSPEEDR {
         }
         let mask = speed.mask();
 
-        unsafe {
-            let mut reg = self.addr();
-            *reg &= !(SPEED_MASK << (port * 2));
-            *reg |= mask << (port * 2);
-        }
+        self.0 &= !(SPEED_MASK << (port * 2));
+        self.0 |= mask << (port * 2);
     }
 
     pub fn get_speed(&self, port: u8) -> Speed {
@@ -89,10 +70,8 @@ impl OSPEEDR {
             panic!("OSPEEDR::get_speed - specified port must be between [0..15]!");
         }
 
-        let mask = unsafe {
-            let reg = self.addr();
-            (*reg & (SPEED_MASK << (port * 2))) >> (port * 2)
-        };
+        let mask = (self.0 & (SPEED_MASK << (port * 2))) >> (port * 2)
+
         Speed::from_mask(mask)
     }
 }

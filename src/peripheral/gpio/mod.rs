@@ -26,16 +26,16 @@ mod pupdr;
 mod afr;
 mod defs;
 
-use super::{Control, Register};
+use core::ops::{Deref, DerefMut};
 use volatile::Volatile;
 use super::rcc;
 use self::defs::*;
 pub use self::port::Port;
-pub use self::moder::Mode;
-pub use self::otyper::Type;
-pub use self::ospeedr::Speed;
-pub use self::pupdr::Pull;
-pub use self::afr::AlternateFunction;
+pub use self::moder::{Mode, MODER};
+pub use self::otyper::{Type, OTYPER};
+pub use self::ospeedr::{Speed, OSPEEDR};
+pub use self::pupdr::{Pull, PUPDR};
+pub use self::afr::{AFRL, AFRH};
 
 /// An IO group containing up to 16 pins. For some reason, the datasheet shows the memory
 /// for groups D and E as reserved, so for now they are left out.
@@ -52,22 +52,25 @@ pub enum Group {
 }
 
 /// A GPIO contains the base address for a memory mapped GPIO group associated with it.
-#[derive(Copy, Clone)]
-pub struct GPIO {
-    mem_addr: *const u32,
-    moder: moder::MODER,
-    otyper: otyper::OTYPER,
-    bsrr: bsrr::BSRR,
-    ospeedr: ospeedr::OSPEEDR,
-    pupdr: pupdr::PUPDR,
-    afr: afr::AlternateFunctionControl,
+#[derive(Debug)]
+#[repr(C)]
+#[doc(hidden)]
+pub struct RawGPIO {
+    moder: MODER,
+    otyper: OTYPER,
+    ospeedr: OSPEEDR,
+    pupdr: PUPDR,
+    idr: IDR,
+    odr: ODR,
+    bsrr: BSRR,
+    lckr: LCKR,
+    afrl: AFRL,
+    afrh: AFRH,
+    brr: BRR,
 }
 
-impl Control for GPIO {
-    unsafe fn mem_addr(&self) -> Volatile<u32> {
-        Volatile::new(self.mem_addr as *const u32)
-    }
-}
+#[derive(Debug)]
+pub struct GPIO(Volatile<RawGPIO>);
 
 impl GPIO {
     fn group(group: Group) -> GPIO {
@@ -80,17 +83,25 @@ impl GPIO {
     }
 
     fn new(mem_addr: *const u32) -> GPIO {
-        GPIO {
-            mem_addr: mem_addr,
-            moder: moder::MODER::new(mem_addr),
-            otyper: otyper::OTYPER::new(mem_addr),
-            bsrr: bsrr::BSRR::new(mem_addr),
-            ospeedr: ospeedr::OSPEEDR::new(mem_addr),
-            pupdr: pupdr::PUPDR::new(mem_addr),
-            afr: afr::AlternateFunctionControl::new(mem_addr),
-        }
+        GPIO(Volatile::new(mem_addr))
     }
+}
 
+impl Deref for GPIO {
+    type Target = RawGPIO;
+
+    fn deref(&self) -> Self::Target {
+        &*(self.0)
+    }
+}
+
+impl DerefMut for GPIO {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut *(self.0)
+    }
+}
+
+impl RawGPIO {
     /// Enable a GPIO group. This must be done before setting any pins within a group.
     ///
     /// Example Usage:
