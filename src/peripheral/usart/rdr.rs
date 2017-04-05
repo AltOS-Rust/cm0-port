@@ -20,27 +20,8 @@
  * through the serial bus.
  */
 
-use super::super::Register;
-use super::defs::*;
-
 #[derive(Copy, Clone, Debug)]
-pub struct RDR {
-    base_addr: *const u32,
-}
-
-impl Register for RDR {
-    fn new(base_addr: *const u32) -> Self {
-        RDR { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        RDR_OFFSET
-    }
-}
+pub struct RDR(u32);
 
 impl RDR {
     /* Bits 31:9 Reserved, must be kept at reset value.
@@ -53,8 +34,6 @@ impl RDR {
      * is the received parity bit.
      */
     pub fn load(&self) -> u8 {
-        unsafe {
-            self.addr().load() as u8
-        }
+        self.0 as u8
     }
 }

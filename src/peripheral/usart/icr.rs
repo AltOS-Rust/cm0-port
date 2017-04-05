@@ -21,75 +21,51 @@
  * It does so by writing a 1 to specific bits in this register.
  */
 
-use super::super::Register;
 use super::defs::*;
 
 #[derive(Copy, Clone, Debug)]
-pub struct ICR {
-    base_addr: *const u32,
-}
-
-impl Register for ICR {
-    fn new(base_addr: *const u32) -> Self {
-        ICR { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        ICR_OFFSET
-    }
-}
+pub struct ICR(u32);
 
 impl ICR {
     /*  Bit 3 ORECF: Overrun error clear flag
      *  Writing 1 to this bit clears the ORE flag in the USARTx_ISR.
      */
     pub fn clear_ore(&mut self) {
-        unsafe {
-            *self.addr() |= ICR_ORECF;
-        }
+        self.0 |= ICR_ORECF;
     }
 
     /* Bit 4 IDLECF: Idle line detected clear flag
      * Writing 1 to this bit clears the IDLE flag in the USARTx_ISR.
      */
     pub fn clear_idle(&mut self) {
-        unsafe {
-            *self.addr() |= ICR_IDLECF;
-        }
+        self.0 |= ICR_IDLECF;
     }
 
     /* Bit 6 TCCF: Transmission complete clear flag
      * Writing 1 to this bit clears the TC flag in the USARTx_ISR.
      */
     pub fn clear_tc(&mut self) {
-        unsafe {
-            *self.addr() |= ICR_TCCF;
-        }
+        self.0 |= ICR_TCCF;
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use test;
 
     #[test]
     fn test_icr_clear_ore() {
-        let mut icr = test::create_register::<ICR>();
+        let mut icr = ICR(0);
         icr.clear_ore();
 
-        assert_eq!(icr.register_value(), 0b1 << 3);
+        assert_eq!(icr.0, 0b1 << 3);
     }
 
     #[test]
     fn test_icr_clear_tc() {
-        let mut icr = test::create_register::<ICR>();
+        let mut icr = ICR(0);
         icr.clear_tc();
 
-        assert_eq!(icr.register_value(), 0b1 << 6);
+        assert_eq!(icr.0, 0b1 << 6);
     }
 }

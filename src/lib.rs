@@ -38,6 +38,7 @@ extern crate altos_core;
 extern crate altos_macros;
 
 pub extern crate arm;
+extern crate volatile_ptr as volatile;
 //pub extern crate compiler_builtins; // See above comment
 
 #[cfg(test)]
@@ -56,8 +57,6 @@ use peripheral::systick;
 
 #[cfg(target_arch="arm")]
 pub use exceptions::EXCEPTIONS;
-
-use altos_core::volatile;
 
 /// Re-exports a subset of the core operating system interface.
 ///
@@ -78,7 +77,7 @@ pub mod kernel {
     }
     /// Collection types for storing data on the heap.
     pub mod collections {
-        pub use altos_core::collections::Vec;
+        pub use altos_core::collections::{Vec, String};
         pub use altos_core::queue::{SortedList, Queue, Node};
     }
     /// Synchronization primitives.

@@ -37,9 +37,9 @@ mod rdr;
 mod isr;
 mod icr;
 
-use super::{Control, Register};
+use core::ops::{Deref, DerefMut};
 use volatile::Volatile;
-use self::control::UsartControl;
+use self::control::{CR1, CR2, CR3};
 use self::baudr::BRR;
 use self::tdr::TDR;
 use self::rdr::RDR;
@@ -67,153 +67,152 @@ pub enum UsartX {
     Usart2,
 }
 
+#[derive(Copy, Clone, Debug)]
+#[repr(C)]
+#[doc(hidden)]
+pub struct RawUsart {
+    cr1: CR1,
+    cr2: CR2,
+    cr3: CR3,
+    brr: BRR,
+    gtpr: u32,
+    rtor: u32,
+    rqr: u32,
+    isr: ISR,
+    icr: ICR,
+    rdr: RDR,
+    tdr: TDR,
+}
+
 /// Usart is the serial peripheral. This type is used to configure
 /// the serial peripheral to send and receive data through the serial bus.
 #[derive(Copy, Clone, Debug)]
-pub struct Usart {
-    // Memory address of the Usart
-    mem_addr: *const u32,
-    // Collection of control registers
-    control: UsartControl,
-    // Baud rate register
-    baud: BRR,
-    // Transmit data register
-    tdr: TDR,
-    // Read data register
-    rdr: RDR,
-    // Interrupt service register
-    isr: ISR,
-    // Interrupt clear register
-    icr: ICR,
-}
-
-impl Control for Usart {
-    unsafe fn mem_addr(&self) -> Volatile<u32> {
-        Volatile::new(self.mem_addr as *const u32)
-    }
-}
+pub struct Usart(Volatile<RawUsart>);
 
 impl Usart {
     /// Creates a new Usart object to configure the specifications for
     /// the serial peripheral.
     pub fn new(x: UsartX) -> Self {
-        match x {
-            UsartX::Usart1 => Usart {
-                mem_addr: USART1_ADDR,
-                control: UsartControl::new(USART1_ADDR),
-                baud: BRR::new(USART1_ADDR),
-                tdr: TDR::new(USART1_ADDR),
-                rdr: RDR::new(USART1_ADDR),
-                isr: ISR::new(USART1_ADDR),
-                icr: ICR::new(USART1_ADDR),
-            },
-            UsartX::Usart2 => Usart {
-                mem_addr: USART2_ADDR,
-                control: UsartControl::new(USART2_ADDR),
-                baud: BRR::new(USART2_ADDR),
-                tdr: TDR::new(USART2_ADDR),
-                rdr: RDR::new(USART2_ADDR),
-                isr: ISR::new(USART2_ADDR),
-                icr: ICR::new(USART2_ADDR),
-            },
+        unsafe {
+            match x {
+                UsartX::Usart1 => Usart(Volatile::new(USART1_ADDR as *const _)),
+                UsartX::Usart2 => Usart(Volatile::new(USART2_ADDR as *const _)),
+            }
         }
     }
+}
 
+impl Deref for Usart {
+    type Target = RawUsart;
+
+    fn deref(&self) -> &Self::Target {
+        &*(self.0)
+    }
+}
+
+impl DerefMut for Usart {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut *(self.0)
+    }
+}
+
+impl RawUsart {
     /// Enable the Usart.
     pub fn enable_usart(&mut self) {
-        self.control.enable_usart();
+        self.cr1.enable_usart(true);
     }
 
     /// Disable the Usart.
     pub fn disable_usart(&mut self) {
-        self.control.disable_usart();
+        self.cr1.enable_usart(false);
     }
 
     /// Check if Usart is enabled. Returns true if enabled, false otherwise.
-    pub fn is_usart_enabled(&mut self) -> bool {
-        self.control.is_usart_enabled()
+    pub fn is_usart_enabled(&self) -> bool {
+        self.cr1.is_usart_enabled()
     }
 
     /// Set the Usart mode for transmit and receive configurations.
     pub fn set_mode(&mut self, mode: Mode) {
-        self.control.set_mode(mode);
+        self.cr1.set_mode(mode);
     }
 
     /// Enable the RXNE interrupt. This interrupt occurs when the
     /// receive data register has data in it.
     pub fn enable_receiver_not_empty_interrupt(&mut self) {
-        self.control.enable_receiver_not_empty_interrupt();
+        self.cr1.set_receiver_not_empty_interrupt(true);
     }
 
     /// Disable the RXNE interrupt. This interrupt occurs when the
     /// receive data register has data in it.
     pub fn disable_receiver_not_empty_interrupt(&mut self) {
-        self.control.disable_receiver_not_empty_interrupt();
+        self.cr1.set_receiver_not_empty_interrupt(false);
     }
 
     /// Enable the TC interrupt. This interrupt occurs when complete
     /// transmission of the data is finished.
     pub fn enable_transmit_complete_interrupt(&mut self) {
-        self.control.enable_transmit_complete_interrupt();
+        self.cr1.set_transmit_complete_interrupt(true);
     }
 
     /// Disable the TC interrupt. This interrupt occurs when complete
     /// transmission of the data is finished.
     pub fn disable_transmit_complete_interrupt(&mut self) {
-        self.control.disable_transmit_complete_interrupt();
+        self.cr1.set_transmit_complete_interrupt(false);
     }
 
     /// Enable the TXE interrupt. This interrupt occurs when the transmit
     /// data register is ready for more data.
     pub fn enable_transmit_interrupt(&mut self) {
-        self.control.enable_transmit_interrupt();
+        self.cr1.set_transmit_interrupt(true);
     }
 
     /// Disable the TXE interrupt. This interrupt occurs when the transmit
     /// data register is ready for more data.
     pub fn disable_transmit_interrupt(&mut self) {
-        self.control.disable_transmit_interrupt();
+        self.cr1.set_transmit_interrupt(false);
     }
 
     /// Enables parity checking. Used to determine if data corruption
     /// has occurred.
     pub fn set_parity(&mut self, parity: Parity) {
-        self.control.set_parity(parity);
+        self.cr1.set_parity(parity);
     }
 
     /// Sets the length of each data packet.
     pub fn set_word_length(&mut self, length: WordLength) {
-        self.control.set_word_length(length);
+        self.cr1.set_word_length(length);
     }
 
     /// Enable oversampling by 8.
     pub fn enable_over8(&mut self) {
-        self.control.enable_over8();
+        self.cr1.set_over8(true);
     }
 
     /// Default to oversampling by 16.
     pub fn disable_over8(&mut self) {
-        self.control.disable_over8();
+        self.cr1.set_over8(false);
     }
 
     /// Set the number of stop bits.
     pub fn set_stop_bits(&mut self, length: StopLength) {
-        self.control.set_stop_bits(length);
+        self.cr2.set_stop_bits(length);
     }
 
     /// Set hardware flow control mode.
     ///
     /// # Note
+    ///
     /// Implementation for this functionality is not complete.
     pub fn set_hardware_flow_control(&mut self, hfc: HardwareFlowControl) {
-        self.control.set_hardware_flow_control(hfc);
+        self.cr3.set_hardware_flow_control(hfc);
     }
 
     // --------------------------------------------------------------
 
     /// Set baud rate based on clock rate function argument.
     pub fn set_baud_rate(&mut self, baud_rate: BaudRate, clock_rate: u32) {
-        self.baud.set_baud_rate(baud_rate, clock_rate, self.control.get_over8());
+        self.brr.set_baud_rate(baud_rate, clock_rate, self.cr1.get_over8());
     }
 
     // --------------------------------------------------------------
