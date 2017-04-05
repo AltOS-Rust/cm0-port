@@ -96,6 +96,7 @@ mod tests {
         ipr.set_priority(Priority::High, 5);
     }
 
+    #[test]
     fn test_ipr_get_priority() {
         let ipr = IPR(0b11 << 6);
 
