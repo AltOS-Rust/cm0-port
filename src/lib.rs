@@ -77,7 +77,7 @@ pub mod kernel {
     }
     /// Collection types for storing data on the heap.
     pub mod collections {
-        pub use altos_core::collections::Vec;
+        pub use altos_core::collections::{Vec, String};
         pub use altos_core::queue::{SortedList, Queue, Node};
     }
     /// Synchronization primitives.
