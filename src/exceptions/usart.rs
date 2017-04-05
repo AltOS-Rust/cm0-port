@@ -21,7 +21,7 @@ use altos_core::syscall;
 use io::{TX_BUFFER, RX_BUFFER};
 
 // Handles transmitting any bytes when an interrupt is generated
-pub fn usart_tx(mut usart: &mut Usart) {
+pub fn usart_tx(mut usart: Usart) {
     if usart.is_tx_reg_empty() {
         if let Some(byte) = unsafe { TX_BUFFER.remove() } {
             usart.transmit_byte(byte);
@@ -40,7 +40,7 @@ pub fn usart_tx(mut usart: &mut Usart) {
 }
 
 /// Handles receiving any bytes when an interrupt is generated
-pub fn usart_rx(mut usart: &mut Usart) {
+pub fn usart_rx(mut usart: Usart) {
     // Clears overrun error flag.
     // If not cleared, interrupt gets repeatedly generated
     // when it doesn't need to be, and loops infinitely.

@@ -33,7 +33,7 @@ pub enum BaudRate {
     Hz115200,
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct BRR(u32);
 
 impl BRR {

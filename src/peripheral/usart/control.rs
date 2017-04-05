@@ -83,11 +83,11 @@ pub enum Mode {
     All,
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct CR1(u32);
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct CR2(u32);
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct CR3(u32);
 
 impl CR1 {

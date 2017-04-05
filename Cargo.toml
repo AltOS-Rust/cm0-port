@@ -18,6 +18,7 @@ test = ["altos_core/test"]
 [dependencies]
 #compiler_builtins = { git = "https://github.com/rust-lang-nursery/compiler-builtins" }
 arm = { path = "libs/arm" }
+volatile-ptr = { git = "https://github.com/AltOS-Rust/volatile" }
 altos-macros = { git = "https://github.com/AltOS-Rust/altos-core" }
 
 [dependencies.altos_core]

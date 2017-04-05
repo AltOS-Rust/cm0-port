@@ -20,7 +20,7 @@
  * data through the serial bus.
  */
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct TDR(u32);
 
 impl TDR {

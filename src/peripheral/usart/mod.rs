@@ -67,7 +67,7 @@ pub enum UsartX {
     Usart2,
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 #[repr(C)]
 #[doc(hidden)]
 pub struct RawUsart {
@@ -86,7 +86,7 @@ pub struct RawUsart {
 
 /// Usart is the serial peripheral. This type is used to configure
 /// the serial peripheral to send and receive data through the serial bus.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct Usart(Volatile<RawUsart>);
 
 impl Usart {

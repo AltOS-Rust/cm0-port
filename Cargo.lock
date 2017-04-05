@@ -5,6 +5,7 @@ dependencies = [
  "altos-macros 0.1.0 (git+https://github.com/AltOS-Rust/altos-core)",
  "altos_core 0.1.0 (git+https://github.com/AltOS-Rust/altos-core)",
  "arm 0.1.0",
+ "volatile-ptr 0.1.0 (git+https://github.com/AltOS-Rust/volatile)",
 ]
 
 [[package]]

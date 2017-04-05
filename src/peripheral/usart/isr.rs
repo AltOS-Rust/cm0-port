@@ -22,7 +22,7 @@
 
 use super::defs::*;
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct ISR(u32);
 
 impl ISR {

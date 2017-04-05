@@ -23,7 +23,7 @@
 
 use super::defs::*;
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct ICR(u32);
 
 impl ICR {

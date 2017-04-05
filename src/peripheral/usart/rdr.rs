@@ -20,7 +20,7 @@
  * through the serial bus.
  */
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct RDR(u32);
 
 impl RDR {
