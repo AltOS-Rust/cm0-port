@@ -37,3 +37,51 @@ impl BSRR {
         self.0 |= 0b1 << (port + BSRR_RESET_OFFSET);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use test;
+
+    #[test]
+    fn test_bsrr_set_8_yields_binary_256() {
+        let mut bsrr = BSRR(0);
+        bsrr.set(8);
+        assert_eq!(bsrr.0, 0x100);
+    }
+
+    #[test]
+    fn test_bsrr_set_3_yields_binary_8() {
+        let mut bsrr = BSRR(0);
+        bsrr.set(3);
+        assert_eq!(bsrr.0, 0x08);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_bsrr_set_panics_when_port_is_out_of_bounds() {
+        let mut bsrr = BSRR(0);
+        bsrr.set(16);
+    }
+
+    #[test]
+    fn test_bsrr_reset_port_0_yields_correct_value() {
+        let mut bsrr = BSRR(0);
+        bsrr.reset(0);
+        assert_eq!(bsrr.0, 0x10000);
+    }
+
+    #[test]
+    fn test_bsrr_reset_port_15_yields_correct_value() {
+        let mut bsrr = BSRR(0);
+        bsrr.reset(15);
+        assert_eq!(bsrr.0, 0x8000_0000);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_bsrr_reset_panics_when_port_is_out_of_bounds() {
+        let mut bsrr = BSRR(0);
+        bsrr.set(16);
+    }
+}
