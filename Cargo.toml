@@ -13,18 +13,15 @@ doc = []
 serial = []
 minicom = ["serial"]
 svc = ["altos_core/syscall"]
-
-[dev-dependencies.altos_core]
-path = "../../altos-core"
-features = ["test"]
+test = ["altos_core/test"]
 
 [dependencies]
 #compiler_builtins = { git = "https://github.com/rust-lang-nursery/compiler-builtins" }
 arm = { path = "libs/arm" }
-altos-macros = { path = "../../altos-core/libs/altos-macros" }
+altos-macros = { git = "https://github.com/AltOS-Rust/altos-core" }
 
 [dependencies.altos_core]
-path = "../../altos-core"
+git = "https://github.com/AltOS-Rust/altos-core"
 features = ["free_list_allocator", "cm0"]
 
 #[dependencies.compiler_builtins]

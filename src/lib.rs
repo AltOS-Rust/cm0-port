@@ -89,9 +89,9 @@ pub mod kernel {
     }
 }
 
-#[cfg(not(any(test, feature="doc")))]
+#[cfg(not(any(test, feature="doc", not(target_arch="arm"))))]
 #[lang = "eh_personality"] extern "C" fn eh_personality() {}
-#[cfg(not(any(test, feature="doc")))]
+#[cfg(not(any(test, feature="doc", not(target_arch="arm"))))]
 #[lang = "panic_fmt"]
 extern "C" fn panic_fmt(fmt: core::fmt::Arguments, (file, line): (&'static str, u32)) -> ! {
     unsafe { arm::asm::disable_interrupts() };
