@@ -15,99 +15,59 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-use peripheral::Register;
-use interrupt::defs::Hardware;
+use interrupt::Hardware;
 
-#[derive(Copy, Clone)]
-pub struct EnableControl {
-    iser: ISER,
-    icer: ICER,
-}
+#[derive(Copy, Clone, Debug)]
+pub struct ISER(u32);
+#[derive(Copy, Clone, Debug)]
+pub struct ICER(u32);
 
-impl EnableControl {
-    pub fn new(base_addr: *const u32) -> Self {
-        EnableControl {
-            iser: ISER::new(base_addr),
-            icer: ICER::new(base_addr),
-        }
-    }
-
+impl ISER {
     pub fn enable_interrupt(&mut self, hardware: Hardware) {
-        self.iser.enable_interrupt(hardware);
-    }
+        let interrupt = hardware as u8;
 
-    pub fn disable_interrupt(&mut self, hardware: Hardware) {
-        self.icer.disable_interrupt(hardware);
+        self.0 |= 0b1 << interrupt;
     }
 
     pub fn interrupt_is_enabled(&self, hardware: Hardware) -> bool {
-        self.iser.interrupt_is_enabled(hardware)
-    }
-}
-
-#[derive(Copy, Clone)]
-struct ISER {
-    base_addr: *const u32,
-}
-
-impl Register for ISER {
-    fn new(base_addr: *const u32) -> Self {
-        ISER { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        0x0
-    }
-}
-
-impl ISER {
-    fn enable_interrupt(&mut self, hardware: Hardware) {
         let interrupt = hardware as u8;
-
-        unsafe {
-            let mut reg = self.addr();
-            *reg |= 0b1 << interrupt;
-        }
-    }
-
-    fn interrupt_is_enabled(&self, hardware: Hardware) -> bool {
-        let interrupt = hardware as u8;
-        unsafe {
-            let reg = self.addr();
-            (*reg & (0b1 << interrupt)) != 0
-        }
-    }
-}
-
-#[derive(Copy, Clone)]
-struct ICER {
-    base_addr: *const u32,
-}
-
-impl Register for ICER {
-    fn new(base_addr: *const u32) -> Self {
-        ICER { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        0x80
+        self.0 & (0b1 << interrupt) != 0
     }
 }
 
 impl ICER {
-    fn disable_interrupt(&mut self, hardware: Hardware) {
+    pub fn disable_interrupt(&mut self, hardware: Hardware) {
         let interrupt = hardware as u8;
-        unsafe {
-            let mut reg = self.addr();
-            *reg |= 0b1 << interrupt;
-        }
+
+        self.0 |= 0b1 << interrupt;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_iser_enable_interrupt() {
+        let mut iser = ISER(0);
+
+        iser.enable_interrupt(Hardware::Flash);
+        assert_eq!(iser.0, 0b1 << 3);
+    }
+
+    #[test]
+    fn test_iser_interrupt_is_enabled() {
+        let iser = ISER(0b1 << 5);
+
+        assert!(iser.interrupt_is_enabled(Hardware::Exti01));
+        assert!(!iser.interrupt_is_enabled(Hardware::Usb));
+    }
+
+    #[test]
+    fn test_icer_disable_interrupt() {
+        let mut icer = ICER(0);
+
+        icer.disable_interrupt(Hardware::Flash);
+        assert_eq!(icer.0, 0b1 << 3);
     }
 }

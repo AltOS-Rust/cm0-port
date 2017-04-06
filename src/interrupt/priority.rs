@@ -15,8 +15,8 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-use peripheral::{Register, Field};
-use interrupt::defs::Hardware;
+use peripheral::Field;
+use super::defs::*;
 
 /// The priority of the interrupt.
 ///
@@ -24,7 +24,7 @@ use interrupt::defs::Hardware;
 /// the CPU will handle the higher priority interrupt before it finishes handling the
 /// lower priority interrupt.
 #[allow(missing_docs)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Priority {
     Highest,
     High,
@@ -35,104 +35,71 @@ pub enum Priority {
 impl Field for Priority {
     fn mask(&self) -> u32 {
         match *self {
-            Priority::Highest => 0b00 << 6,
-            Priority::High => 0b01 << 6,
-            Priority::Low => 0b10 << 6,
-            Priority::Lowest => 0b11 << 6,
+            Priority::Highest => IPR_PRIORITY_HIGHEST,
+            Priority::High => IPR_PRIORITY_HIGH,
+            Priority::Low => IPR_PRIORITY_LOW,
+            Priority::Lowest => IPR_PRIORITY_LOWEST,
         }
     }
 }
 
 impl Priority {
     fn from_mask(mask: u32) -> Self {
-        match mask >> 6 {
-            0b00 => Priority::Highest,
-            0b01 => Priority::High,
-            0b10 => Priority::Low,
-            0b11 => Priority::Lowest,
+        match mask {
+            IPR_PRIORITY_HIGHEST => Priority::Highest,
+            IPR_PRIORITY_HIGH => Priority::High,
+            IPR_PRIORITY_LOW => Priority::Low,
+            IPR_PRIORITY_LOWEST => Priority::Lowest,
             _ => panic!("Priority::from_mask - mask was not a valid value!"),
         }
     }
 }
 
-#[derive(Copy, Clone)]
-pub struct PriorityControl {
-    ipr_registers: [IPR; 8],
-}
-
-impl PriorityControl {
-    pub fn new(base_addr: *const u32) -> Self {
-        PriorityControl {
-            ipr_registers: [
-            IPR::new(base_addr, 0x00),
-            IPR::new(base_addr, 0x04),
-            IPR::new(base_addr, 0x08),
-            IPR::new(base_addr, 0x0C),
-            IPR::new(base_addr, 0x10),
-            IPR::new(base_addr, 0x14),
-            IPR::new(base_addr, 0x18),
-            IPR::new(base_addr, 0x1C)],
-        }
-    }
-
-    pub fn set_priority(&mut self, priority: Priority, hardware: Hardware) {
-        let interrupt = hardware as u8;
-        let mut ipr = self.ipr_registers[(interrupt / 4) as usize];
-        ipr.set_priority(priority, interrupt % 4);
-    }
-
-    pub fn get_priority(&self, hardware: Hardware) -> Priority {
-        let interrupt = hardware as u8;
-        let ipr = self.ipr_registers[(interrupt / 4) as usize];
-        ipr.get_priority(interrupt % 4)
-    }
-}
-
-#[derive(Copy, Clone)]
-struct IPR {
-    base_addr: *const u32,
-    mem_offset: u32,
-}
-
-impl Register for IPR {
-    fn new(_base_addr: *const u32) -> Self {
-        unimplemented!();
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        self.mem_offset
-    }
-}
+#[derive(Copy, Clone, Debug)]
+pub struct IPR(u32);
 
 impl IPR {
-    fn new(base_addr: *const u32, offset: u32) -> Self {
-        IPR {
-            base_addr: base_addr,
-            mem_offset: offset,
-        }
-    }
-
-    fn set_priority(&mut self, priority: Priority, interrupt: u8) {
+    pub fn set_priority(&mut self, priority: Priority, interrupt: u8) {
+        assert!(interrupt < 4);
         let mask = priority.mask();
-        unsafe {
-            let mut reg = self.addr();
+        let interrupt_shift = interrupt * 8;
 
-            // Clear top bits first
-            *reg &= !((0b11 << 6) << (interrupt * 8));
-            *reg |= mask << (interrupt * 8);
-        }
+        self.0 &= !(IPR_PRIORITY_FIELD_MASK << interrupt_shift);
+        self.0 |= mask << interrupt_shift;
     }
 
-    fn get_priority(&self, interrupt:u8) -> Priority {
-        let mask = unsafe {
-            let reg = self.addr();
-
-            (*reg & (0b11 << 6) << (interrupt * 8)) >> (interrupt * 8)
-        };
+    pub fn get_priority(&self, interrupt:u8) -> Priority {
+        assert!(interrupt < 4);
+        let interrupt_shift = interrupt * 8;
+        let mask = (self.0 & IPR_PRIORITY_FIELD_MASK << interrupt_shift) >> interrupt_shift;
         Priority::from_mask(mask)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ipr_set_priority() {
+        let mut ipr = IPR(0);
+
+        ipr.set_priority(Priority::High, 1);
+        assert_eq!(ipr.0, 0b01 << 14);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_ipr_set_priority_offset_greater_than_4_panics() {
+        let mut ipr = IPR(0);
+
+        ipr.set_priority(Priority::High, 5);
+    }
+
+    #[test]
+    fn test_ipr_get_priority() {
+        let ipr = IPR(0b11 << 6);
+
+        assert_eq!(ipr.get_priority(0), Priority::Lowest);
     }
 }
