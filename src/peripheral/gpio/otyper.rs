@@ -15,7 +15,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-use super::super::{Register, Field};
+use super::super::Field;
 use super::defs::*;
 
 /// Available GPIO pin types.
@@ -46,24 +46,8 @@ impl Type {
     }
 }
 
-#[derive(Copy, Clone)]
-pub struct OTYPER {
-    base_addr: *const u32,
-}
-
-impl Register for OTYPER {
-    fn new(base_addr: *const u32) -> Self {
-        OTYPER { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        OTYPER_OFFSET
-    }
-}
+#[derive(Copy, Clone, Debug)]
+pub struct OTYPER(u32);
 
 impl OTYPER {
     pub fn set_type(&mut self, new_type: Type, port: u8) {
@@ -71,12 +55,9 @@ impl OTYPER {
             panic!("OTYPER::set_type - specified port must be between [0..15]!");
         }
 
-        unsafe {
-            let mut reg = self.addr();
-            match new_type {
-                Type::PushPull => *reg &= !(0b1 << port),
-                Type::OpenDrain => *reg |= 0b1 << port,
-            }
+        match new_type {
+            Type::PushPull => self.0 &= !(0b1 << port),
+            Type::OpenDrain => self.0 |= 0b1 << port,
         }
     }
 
@@ -85,11 +66,8 @@ impl OTYPER {
             panic!("OTYPER::get_type - specified port must be between [0..15]!");
         }
 
-        let mask = unsafe {
-            let reg = self.addr();
+        let mask = (self.0 & (0b1 << port)) >> port;
 
-            (*reg & (0b1 << port)) >> port
-        };
         Type::from_mask(mask)
     }
 }

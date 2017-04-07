@@ -15,7 +15,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-use super::super::{Register, Field};
+use super::super::Field;
 use super::defs::*;
 
 /// Defines the behavior of the GPIO pin when not asserted.
@@ -50,24 +50,8 @@ impl Pull {
     }
 }
 
-#[derive(Copy, Clone)]
-pub struct PUPDR {
-    base_addr: *const u32,
-}
-
-impl Register for PUPDR {
-    fn new(base_addr: *const u32) -> Self {
-        PUPDR { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        PUPDR_OFFSET
-    }
-}
+#[derive(Copy, Clone, Debug)]
+pub struct PUPDR(u32);
 
 impl PUPDR {
     pub fn set_pull(&mut self, pull: Pull, port: u8) {
@@ -76,11 +60,8 @@ impl PUPDR {
         }
         let mask = pull.mask();
 
-        unsafe {
-            let mut reg = self.addr();
-            *reg &= !(PUPD_MASK << (port * 2));
-            *reg |= mask << (port * 2);
-        }
+        self.0 &= !(PUPD_MASK << (port * 2));
+        self.0 |= mask << (port * 2);
     }
 
     pub fn get_pull(&self, port: u8) -> Pull {
@@ -88,10 +69,8 @@ impl PUPDR {
             panic!("PUPDR::get_pull - specified port must be between [0..15]!");
         }
 
-        let mask = unsafe {
-            let reg = self.addr();
-            (*reg & (PUPD_MASK << (port * 2))) >> (port * 2)
-        };
+        let mask = (self.0 & (PUPD_MASK << (port * 2))) >> (port * 2);
+
         Pull::from_mask(mask)
     }
 }

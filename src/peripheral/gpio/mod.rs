@@ -26,16 +26,24 @@ mod pupdr;
 mod afr;
 mod defs;
 
-use super::{Control, Register};
+use core::ops::{Deref, DerefMut};
 use volatile::Volatile;
 use super::rcc;
 use self::defs::*;
+
 pub use self::port::Port;
 pub use self::moder::Mode;
 pub use self::otyper::Type;
 pub use self::ospeedr::Speed;
 pub use self::pupdr::Pull;
 pub use self::afr::AlternateFunction;
+
+use self::moder::MODER;
+use self::otyper::OTYPER;
+use self::ospeedr::OSPEEDR;
+use self::pupdr::PUPDR;
+use self::bsrr::BSRR;
+use self::afr::{AFRL, AFRH};
 
 /// An IO group containing up to 16 pins. For some reason, the datasheet shows the memory
 /// for groups D and E as reserved, so for now they are left out.
@@ -52,22 +60,29 @@ pub enum Group {
 }
 
 /// A GPIO contains the base address for a memory mapped GPIO group associated with it.
-#[derive(Copy, Clone)]
-pub struct GPIO {
-    mem_addr: *const u32,
-    moder: moder::MODER,
-    otyper: otyper::OTYPER,
-    bsrr: bsrr::BSRR,
-    ospeedr: ospeedr::OSPEEDR,
-    pupdr: pupdr::PUPDR,
-    afr: afr::AlternateFunctionControl,
+#[derive(Copy, Clone, Debug)]
+#[repr(C)]
+#[doc(hidden)]
+pub struct RawGPIO {
+    moder: MODER,
+    otyper: OTYPER,
+    ospeedr: OSPEEDR,
+    pupdr: PUPDR,
+    idr: u32,
+    odr: u32,
+    bsrr: BSRR,
+    lckr: u32,
+    afrl: AFRL,
+    afrh: AFRH,
+    brr: u32,
 }
 
-impl Control for GPIO {
-    unsafe fn mem_addr(&self) -> Volatile<u32> {
-        Volatile::new(self.mem_addr as *const u32)
-    }
-}
+/// Creates struct for accessing the GPIO groups.
+///
+/// Has a RawGPIO data member in order to access each register for the
+/// GPIO peripheral.
+#[derive(Copy, Clone, Debug)]
+pub struct GPIO(Volatile<RawGPIO>);
 
 impl GPIO {
     fn group(group: Group) -> GPIO {
@@ -80,17 +95,32 @@ impl GPIO {
     }
 
     fn new(mem_addr: *const u32) -> GPIO {
-        GPIO {
-            mem_addr: mem_addr,
-            moder: moder::MODER::new(mem_addr),
-            otyper: otyper::OTYPER::new(mem_addr),
-            bsrr: bsrr::BSRR::new(mem_addr),
-            ospeedr: ospeedr::OSPEEDR::new(mem_addr),
-            pupdr: pupdr::PUPDR::new(mem_addr),
-            afr: afr::AlternateFunctionControl::new(mem_addr),
+        unsafe {
+            GPIO(Volatile::new(mem_addr as *const _))
         }
     }
 
+    /// Wrapper for enabling a GPIO group.
+    pub fn enable(group: Group) {
+        RawGPIO::enable(group);
+    }
+}
+
+impl Deref for GPIO {
+    type Target = RawGPIO;
+
+    fn deref(&self) -> &Self::Target {
+        &*(self.0)
+    }
+}
+
+impl DerefMut for GPIO {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut *(self.0)
+    }
+}
+
+impl RawGPIO {
     /// Enable a GPIO group. This must be done before setting any pins within a group.
     ///
     /// Example Usage:
@@ -193,12 +223,28 @@ impl GPIO {
     }
 
     /// Set the GPIO function type.
+    ///
+    /// # Panics
+    ///
+    /// Port must be a value between [0..15] or the kernel will panic.
     fn set_function(&mut self, function: AlternateFunction, port: u8) {
-        self.afr.set_function(function, port);
+        match port {
+            0...7 => self.afrl.set_function(function, port),
+            8...15 => self.afrh.set_function(function, port),
+            _ => panic!("AFRL/AFRH::set_function - specified port must be between [0..15]!"),
+        }
     }
 
     /// Get the GPIO function type.
+    ///
+    /// # Panics
+    ///
+    /// Port must be a value between [0..15] or the kernel will panic.
     fn get_function(&self, port: u8) -> AlternateFunction {
-        self. afr.get_function(port)
+        match port {
+            0...7 => self.afrl.get_function(port),
+            8...15 => self.afrh.get_function(port),
+            _ => panic!("AFRL/AFRH::set_function - specified port must be between [0..15]!"),
+        }
     }
 }

@@ -15,7 +15,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-use super::super::{Register, Field};
+use super::super::Field;
 use super::defs::*;
 
 /// Set the functionality of a port.
@@ -65,107 +65,33 @@ impl AlternateFunction {
     }
 }
 
-#[derive(Copy, Clone)]
-pub struct AlternateFunctionControl {
-    afrl: AFRL,
-    afrh: AFRH,
-}
-
-impl AlternateFunctionControl {
-    pub fn new(base_addr: *const u32) -> Self {
-        AlternateFunctionControl {
-            afrl: AFRL::new(base_addr),
-            afrh: AFRH::new(base_addr),
-        }
-    }
-
-    pub fn set_function(&mut self, function: AlternateFunction, port: u8) {
-        if port < 8 {
-            self.afrl.set_function(function, port);
-        }
-        else {
-            self.afrh.set_function(function, port);
-        }
-    }
-
-    pub fn get_function(&self, port: u8) -> AlternateFunction {
-        if port < 8 {
-            self.afrl.get_function(port)
-        }
-        else {
-            self.afrh.get_function(port)
-        }
-    }
-}
-
-#[derive(Copy, Clone)]
-struct AFRL {
-    base_addr: *const u32,
-}
-
-impl Register for AFRL {
-    fn new(base_addr: *const u32) -> Self {
-        AFRL { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        AFRL_OFFSET
-    }
-}
-
+#[derive(Copy, Clone, Debug)]
+pub struct AFRL(u32);
 impl AFRL {
-    fn set_function(&mut self, function: AlternateFunction, port: u8) {
+    pub fn set_function(&mut self, function: AlternateFunction, port: u8) {
         if port > 8 {
             panic!("AFRL::set_function - specified port must be between [0..7]!");
         }
         let mask = function.mask();
 
-        unsafe {
-            let mut reg = self.addr();
-            *reg &= !(AFR_MASK << (port * 4));
-            *reg |= mask << (port * 4);
-        }
+        self.0 &= !(AFR_MASK << (port * 4));
+        self.0 |= mask << (port * 4);
     }
 
-    fn get_function(&self, port: u8) -> AlternateFunction {
+    pub fn get_function(&self, port: u8) -> AlternateFunction {
         if port > 8 {
-            panic!("AFRL::get_function - specified port must be between [0..7]!");
+            panic!("AFRL::set_function - specified port must be between [0..7]!");
         }
+        let mask = self.0 & (AFR_MASK << (port * 4));
 
-        let mask = unsafe {
-            let reg = self.addr();
-
-            *reg & (AFR_MASK << (port * 4))
-        };
         AlternateFunction::from_mask(mask)
     }
 }
 
-#[derive(Copy, Clone)]
-struct AFRH {
-    base_addr: *const u32,
-}
-
-impl Register for AFRH {
-    fn new(base_addr: *const u32) -> Self {
-        AFRH { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        AFRH_OFFSET
-    }
-}
-
+#[derive(Copy, Clone, Debug)]
+pub struct AFRH(u32);
 impl AFRH {
-    fn set_function(&mut self, function: AlternateFunction, port: u8) {
+    pub fn set_function(&mut self, function: AlternateFunction, port: u8) {
         if port > 15 || port < 8 {
             panic!("AFRH::set_function - specified port must be between [8..15]!");
         }
@@ -175,26 +101,18 @@ impl AFRH {
         // for 0-7 and 8-15. i.e. port 9 is actually offset 1 * 4 in the afrh register
         // (rather than offset 9 * 4)
         let port = port - 8;
-        unsafe {
-            let mut reg = self.addr();
-
-            *reg &= !(AFR_MASK << (port * 4));
-            *reg |= mask << (port * 4);
-        }
+        self.0 &= !(AFR_MASK << (port * 4));
+        self.0 |= mask << (port * 4);
     }
 
-    fn get_function(&self, port: u8) -> AlternateFunction {
+    pub fn get_function(&self, port: u8) -> AlternateFunction {
         if port > 15 || port < 8 {
-            panic!("AFRL::get_function - specified port must be between [8..15]!");
+            panic!("AFRH::get_function - specified port must be between [8..15]!");
         }
-
         // #9: See comment in `set_function`
         let port = port - 8;
-        let mask = unsafe {
-            let reg = self.addr();
+        let mask = self.0 & (AFR_MASK << (port * 4));
 
-            *reg & (AFR_MASK << (port * 4))
-        };
         AlternateFunction::from_mask(mask)
     }
 }
@@ -205,32 +123,32 @@ mod tests {
     use test;
 
     #[test]
-    fn test_afrh_set_function() {
-        let mut afrh = test::create_register::<AFRH>();
-        afrh.set_function(AlternateFunction::Five, 8);
-
-        assert_eq!(afrh.register_value(), 0x5);
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_afrh_set_port_out_of_bounds_panics() {
-        let mut afrh = test::create_register::<AFRH>();
-        afrh.set_function(AlternateFunction::Seven, 2);
-    }
-
-    #[test]
     fn test_afrl_set_function() {
-        let mut afrl = test::create_register::<AFRL>();
+        let mut afrl = AFRL(0);
         afrl.set_function(AlternateFunction::Two, 3);
 
-        assert_eq!(afrl.register_value(), 0x2000);
+        assert_eq!(afrl.0, 0x2000);
     }
 
     #[test]
     #[should_panic]
     fn test_afrl_set_port_out_of_bounds_panics() {
-        let mut afrl = test::create_register::<AFRL>();
+        let mut afrl = AFRL(0);
         afrl.set_function(AlternateFunction::Two, 10);
+    }
+
+    #[test]
+    fn test_afrh_set_function() {
+        let mut afrh = AFRH(0);
+        afrh.set_function(AlternateFunction::Five, 8);
+
+        assert_eq!(afrh.0, 0x5);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_afrh_set_port_out_of_bounds_panics() {
+        let mut afrh = AFRH(0);
+        afrh.set_function(AlternateFunction::Seven, 2);
     }
 }
