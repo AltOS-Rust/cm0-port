@@ -44,6 +44,7 @@ pub struct RawSysTick {
     csr: CSR,
     rvr: RVR,
     cvr: CVR,
+    calib: u32,
 }
 
 #[derive(Copy, Clone, Debug)]
