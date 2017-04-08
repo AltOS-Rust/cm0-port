@@ -52,8 +52,22 @@ pub struct SysTick(Volatile<RawSysTick>);
 impl SysTick {
     fn systick() -> Self {
         unsafe {
-            SysTick(Volatile::new(SYSTICK_ADDR as *const _));
+            SysTick(Volatile::new(SYSTICK_ADDR as *const _))
         }
+    }
+}
+
+impl Deref for SysTick {
+    type Target = RawSysTick;
+
+    fn deref(&self) -> &Self::Target {
+        &*(self.0)
+    }
+}
+
+impl DerefMut for SysTick {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut *(self.0)
     }
 }
 

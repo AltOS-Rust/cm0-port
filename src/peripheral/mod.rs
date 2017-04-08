@@ -23,13 +23,7 @@ pub mod systick;
 #[cfg(feature="serial")]
 pub mod usart;
 
-use core::ops::{Deref, MutDeref};
 use volatile::Volatile;
-use self::reload_value::RVR;
-use self::current_value::CVR;
-use self::control_status::CSR;
-
-pub use self::control_status::ClockSource;
 
 #[macro_export]
 macro_rules! pad_field {
