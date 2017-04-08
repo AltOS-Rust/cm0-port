@@ -126,81 +126,8 @@ impl Field for Peripheral {
     }
 }
 
-#[derive(Copy, Clone)]
-pub struct PeripheralControl {
-    ahbenr: AHBENR,
-    apbenr1: APBENR1,
-    apbenr2: APBENR2,
-}
-
-impl PeripheralControl {
-    pub fn new(base_addr: *const u32) -> Self {
-        PeripheralControl {
-            ahbenr: AHBENR::new(base_addr),
-            apbenr1: APBENR1::new(base_addr),
-            apbenr2: APBENR2::new(base_addr),
-        }
-    }
-
-    pub fn enable_peripheral(&mut self, peripheral: Peripheral) {
-        self.set_control_register(true, peripheral);
-    }
-
-    pub fn disable_peripheral(&mut self, peripheral: Peripheral) {
-        self.set_control_register(false, peripheral);
-    }
-
-    pub fn peripheral_is_enabled(&self, peripheral: Peripheral) -> bool {
-        if self.ahbenr.serves_peripheral(peripheral) {
-            self.ahbenr.get_enable(peripheral)
-        }
-        else if self.apbenr1.serves_peripheral(peripheral) {
-            self.apbenr1.get_enable(peripheral)
-        }
-        else if self.apbenr2.serves_peripheral(peripheral) {
-            self.apbenr2.get_enable(peripheral)
-        }
-        else {
-            panic!("PeripheralControl::peripheral_is_enabled - specified peripheral not served, did you
-            forget to add it to a control register?");
-        }
-    }
-
-    fn set_control_register(&mut self, enable: bool, peripheral: Peripheral) {
-        if self.ahbenr.serves_peripheral(peripheral) {
-            self.ahbenr.set_enable(enable, peripheral);
-        }
-        else if self.apbenr1.serves_peripheral(peripheral) {
-            self.apbenr1.set_enable(enable, peripheral);
-        }
-        else if self.apbenr2.serves_peripheral(peripheral) {
-            self.apbenr2.set_enable(enable, peripheral);
-        }
-        else {
-            panic!("PeripheralControl::set_control_register - specified peripheral not served, did you
-            forget to add it to a control register?");
-        }
-    }
-}
-
-#[derive(Copy, Clone)]
-struct AHBENR {
-    base_addr: *const u32,
-}
-
-impl Register for AHBENR {
-    fn new(base_addr: *const u32) -> Self {
-        AHBENR { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        AHBENR_OFFSET
-    }
-}
+#[derive(Copy, Clone, Debug)]
+pub struct AHBENR(u32);
 
 impl AHBENR {
     fn get_enable(&self, peripheral: Peripheral) -> bool {
@@ -209,11 +136,7 @@ impl AHBENR {
         }
         let mask = peripheral.mask();
 
-        unsafe {
-            let reg = self.addr();
-
-            *reg & mask != 0
-        }
+        self.0 & mask != 0
     }
 
     fn set_enable(&mut self, enable: bool, peripheral: Peripheral) {
@@ -222,12 +145,9 @@ impl AHBENR {
         }
         let mask = peripheral.mask();
 
-        unsafe {
-            let mut reg = self.addr();
-            *reg &= !mask;
-            if enable {
-                *reg |= mask;
-            }
+        self.0 &= !mask;
+        if enable {
+            self.0 |= mask;
         }
     }
 
@@ -242,24 +162,8 @@ impl AHBENR {
     }
 }
 
-#[derive(Copy, Clone)]
-struct APBENR1 {
-    base_addr: *const u32,
-}
-
-impl Register for APBENR1 {
-    fn new(base_addr: *const u32) -> Self {
-        APBENR1 { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        APBENR1_OFFSET
-    }
-}
+#[derive(Copy, Clone, Debug)]
+pub struct APBENR1(u32);
 
 impl APBENR1 {
     fn get_enable(&self, peripheral: Peripheral) -> bool {
@@ -268,11 +172,7 @@ impl APBENR1 {
         }
         let mask = peripheral.mask();
 
-        unsafe {
-            let reg = self.addr();
-
-            *reg & mask != 0
-        }
+        self.0 & mask != 0
     }
 
     fn set_enable(&mut self, enable: bool, peripheral: Peripheral) {
@@ -281,12 +181,9 @@ impl APBENR1 {
         }
         let mask = peripheral.mask();
 
-        unsafe {
-            let mut reg = self.addr();
-            *reg &= !mask;
-            if enable {
-                *reg |= mask;
-            }
+        self.0 &= !mask;
+        if enable {
+            self.0 |= mask;
         }
     }
 
@@ -304,23 +201,7 @@ impl APBENR1 {
 }
 
 #[derive(Copy, Clone)]
-struct APBENR2 {
-    base_addr: *const u32,
-}
-
-impl Register for APBENR2 {
-    fn new(base_addr: *const u32) -> Self {
-        APBENR2 { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        APBENR2_OFFSET
-    }
-}
+pub struct APBENR2(u32);
 
 impl APBENR2 {
     fn get_enable(&self, peripheral: Peripheral) -> bool {
@@ -329,10 +210,7 @@ impl APBENR2 {
         }
         let mask = peripheral.mask();
 
-        unsafe {
-            let reg = self.addr();
-            *reg & mask != 0
-        }
+        self.0 & mask != 0
     }
 
     fn set_enable(&mut self, enable: bool, peripheral: Peripheral) {
@@ -341,12 +219,9 @@ impl APBENR2 {
         }
         let mask = peripheral.mask();
 
-        unsafe {
-            let mut reg = self.addr();
-            *reg &= !mask;
-            if enable {
-                *reg |= mask;
-            }
+        self.0 &= !mask;
+        if enable {
+            self.0 |= mask;
         }
     }
 

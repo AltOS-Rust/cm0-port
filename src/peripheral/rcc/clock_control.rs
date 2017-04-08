@@ -74,54 +74,6 @@ pub enum Clock {
     PLL,
 }
 
-/// Clock Control Register
-#[derive(Copy, Clone)]
-pub struct ClockControl {
-    cr: CR,
-    cr2: CR2,
-}
-
-impl ClockControl {
-    pub fn new(base_addr: *const u32) -> Self {
-        ClockControl {
-            cr: CR::new(base_addr),
-            cr2: CR2::new(base_addr),
-        }
-    }
-
-    /// Enable a clock.
-    pub fn enable_clock(&mut self, clock: Clock) {
-        match clock {
-            Clock::HSI | Clock::HSE | Clock::PLL => self.cr.set_clock(true, clock),
-            Clock::HSI48 | Clock::HSI14 => self.cr2.set_clock(true, clock),
-        };
-    }
-
-    /// Disable a clock. If a clock is unable to be disabled, the return value will be false.
-    pub fn disable_clock(&mut self, clock: Clock) -> bool {
-        match clock {
-            Clock::HSI | Clock::HSE | Clock::PLL => self.cr.set_clock(false, clock),
-            Clock::HSI48 | Clock::HSI14 => self.cr2.set_clock(false, clock),
-        }
-    }
-
-    /// Return true if the specified clock is enabled, false otherwise.
-    pub fn clock_is_on(&self, clock: Clock) -> bool {
-        match clock {
-            Clock::HSI | Clock::HSE | Clock::PLL => self.cr.clock_is_on(clock),
-            Clock::HSI48 | Clock::HSI14 => self.cr2.clock_is_on(clock),
-        }
-    }
-
-    /// Return true if the specified clock is ready for use, false otherwise.
-    pub fn clock_is_ready(&self, clock: Clock) -> bool {
-        match clock {
-            Clock::HSI | Clock::HSE | Clock::PLL => self.cr.clock_is_ready(clock),
-            Clock::HSI48 | Clock::HSI14 => self.cr2.clock_is_ready(clock),
-        }
-    }
-}
-
 /// The CR register only controls the PLL, HSE, and HSI clocks. If another clock is passed in as an
 /// argument to any of the methods that take a clock argument, the kernel will panic.
 #[derive(Copy, Clone, Debug)]
