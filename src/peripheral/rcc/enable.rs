@@ -200,7 +200,7 @@ impl APBENR1 {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct APBENR2(u32);
 
 impl APBENR2 {

@@ -41,7 +41,9 @@ pub fn rcc() -> RCC {
 }
 
 /// Reset and Clock Controller
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
+#[repr(C)]
+#[doc(hidden)]
 pub struct RawRCC {
     cr: CR,
     cfgr: CFGR,
@@ -59,6 +61,7 @@ pub struct RawRCC {
     cr2: CR2,
 }
 
+#[derive(Copy, Clone, Debug)]
 pub struct RCC(Volatile<RawRCC>);
 
 impl RCC {
