@@ -17,7 +17,6 @@
 
 //! This module handles the CFGR register, which deals with clock configuration.
 
-use super::super::Register;
 use super::Clock;
 use super::defs::*;
 

@@ -18,7 +18,7 @@
 //! This module is used to control the AHBENR (AHB peripheral enable register), which controls the
 //! clock to the peripherals controled by the AHB clock.
 
-use super::super::{Register, Field};
+use super::super::Field;
 use super::defs::*;
 
 /// Defines available peripherals.
