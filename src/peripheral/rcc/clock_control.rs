@@ -83,7 +83,7 @@ impl CR {
     /// Set a clock to be on if `enable` is true, off otherwise. If `enable` is true, the return
     /// value is always true. If `enable` is false, the return value will be true if the clock was
     /// successfully disabled.
-    fn set_clock(&mut self, enable: bool, clock: Clock) -> bool {
+    pub fn set_clock(&mut self, enable: bool, clock: Clock) -> bool {
         let mask = match clock {
             Clock::PLL => PLLON,
             Clock::HSE => HSEON,
@@ -102,7 +102,7 @@ impl CR {
     }
 
     /// Return true if the specified clock is enabled.
-    fn clock_is_on(&self, clock: Clock) -> bool {
+    pub fn clock_is_on(&self, clock: Clock) -> bool {
         let mask = match clock {
             Clock::PLL => PLLON,
             Clock::HSE => HSEON,
@@ -114,7 +114,7 @@ impl CR {
     }
 
     /// Return true if the specified clock is ready for use.
-    fn clock_is_ready(&self, clock: Clock) -> bool {
+    pub fn clock_is_ready(&self, clock: Clock) -> bool {
         let mask = match clock {
             Clock::PLL => PLLRDY,
             Clock::HSE => HSERDY,
@@ -135,7 +135,7 @@ impl CR2 {
     /// Set a clock to be on if `enable` is true, off otherwise. If `enable` is true, the return
     /// value is always true. If `enable` is false, the return value will be true if the clock was
     /// successfully disabled.
-    fn set_clock(&mut self, enable: bool, clock: Clock) -> bool {
+    pub fn set_clock(&mut self, enable: bool, clock: Clock) -> bool {
         let mask = match clock {
             Clock::HSI48 => CR2_HSI48ON,
             Clock::HSI14 => CR2_HSI14ON,
@@ -148,23 +148,23 @@ impl CR2 {
         }
         else {
             self.0 &= !mask;
-            self.0 & mask) == 0
+            (self.0 & mask) == 0
         }
     }
 
     /// Return true if the specified clock is enabled.
-    fn clock_is_on(&self, clock: Clock) -> bool {
+    pub fn clock_is_on(&self, clock: Clock) -> bool {
         let mask = match clock {
             Clock::HSI48 => CR2_HSI48ON,
             Clock::HSI14 => CR2_HSI14ON,
             _ => panic!("CR2::clock_is_on - argument clock is not controlled by this register!"),
         };
 
-        self.0 & mask) != 0
+        (self.0 & mask) != 0
     }
 
     /// Return true if the specified clock is ready for use.
-    fn clock_is_ready(&self, clock: Clock) -> bool {
+    pub fn clock_is_ready(&self, clock: Clock) -> bool {
         let mask = match clock {
             Clock::HSI48 => CR2_HSI48RDY,
             Clock::HSI14 => CR2_HSI14RDY,

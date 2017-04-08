@@ -26,7 +26,7 @@ use super::defs::*;
 pub struct CFGR(u32);
 
 impl CFGR {
-    fn get_system_clock_source(&self) -> Clock {
+    pub fn get_system_clock_source(&self) -> Clock {
         let set_bits = self.0 & CFGR_SWS_MASK;
 
         match set_bits {
@@ -38,7 +38,7 @@ impl CFGR {
         }
     }
 
-    fn set_system_clock_source(&mut self, clock: Clock) {
+    pub fn set_system_clock_source(&mut self, clock: Clock) {
         let mask = match clock {
             Clock::HSI => CFGR_CLOCK_HSI,
             Clock::HSE => CFGR_CLOCK_HSE,
@@ -52,7 +52,7 @@ impl CFGR {
         self.0 |= mask;
     }
 
-    fn get_pll_source(&self) -> Clock {
+    pub fn get_pll_source(&self) -> Clock {
         let set_bits = self.0 & CFGR_PLLSRC_MASK;
 
         match set_bits {
@@ -63,7 +63,7 @@ impl CFGR {
         }
     }
 
-    fn set_pll_source(&mut self, clock: Clock) {
+    pub fn set_pll_source(&mut self, clock: Clock) {
         let mask = match clock {
             Clock::HSI   => CFGR_PLLSRC_HSI_2,
             Clock::HSE   => CFGR_PLLSRC_HSE_PREDIV,
@@ -76,7 +76,7 @@ impl CFGR {
         self.0 |= mask;
     }
 
-    fn get_pll_multiplier(&self) -> u8 {
+    pub fn get_pll_multiplier(&self) -> u8 {
         let set_bits = (self.0 & CFGR_PLLMUL_MASK) >> 18;
 
         // Just the way the multiplier is set up...
@@ -87,7 +87,7 @@ impl CFGR {
         mul as u8
     }
 
-    fn set_pll_multiplier(&mut self, mul: u8) {
+    pub fn set_pll_multiplier(&mut self, mul: u8) {
         if mul < 2 || mul > 16 {
             panic!("CFGR::set_pll_multiplier - the multiplier must be between 2..16!");
         }
@@ -103,14 +103,14 @@ impl CFGR {
 pub struct CFGR2(u32);
 
 impl CFGR2 {
-    fn get_pll_prediv_factor(&self) -> u8 {
+    pub fn get_pll_prediv_factor(&self) -> u8 {
         let set_bits = self.0 & CFGR2_PREDIV_MASK;
 
         // Division factor is 1 greater than the value of the bits set
         (set_bits + 1) as u8
     }
 
-    fn set_pll_prediv_factor(&mut self, factor: u8) {
+    pub fn set_pll_prediv_factor(&mut self, factor: u8) {
         if factor < 1 || factor > 16 {
             panic!("CFGR2::set_pll_prediv_factor - the division factor must be between 1..16!");
         }

@@ -32,8 +32,6 @@ use self::clock_control::{CR, CR2};
 use self::config::{CFGR, CFGR2};
 use self::enable::{AHBENR, APBENR1, APBENR2};
 
-use self::config::
-
 pub use self::clock_control::Clock;
 pub use self::enable::Peripheral;
 
@@ -54,8 +52,8 @@ pub struct RawRCC {
     apbenr2: APBENR2,
     apbenr1: APBENR1,
     bdcr: u32,
-    csr, u32,
-    ahbrstr, u32,
+    csr: u32,
+    ahbrstr: u32,
     cfgr2: CFGR2,
     cfgr3: u32,
     cr2: CR2,
@@ -65,7 +63,9 @@ pub struct RCC(Volatile<RawRCC>);
 
 impl RCC {
     fn rcc() -> Self {
-        RCC(Volatile::new(RCC_ADDR as *const _));
+        unsafe {
+            RCC(Volatile::new(RCC_ADDR as *const _))
+        }
     }
 }
 

@@ -130,7 +130,7 @@ impl Field for Peripheral {
 pub struct AHBENR(u32);
 
 impl AHBENR {
-    fn get_enable(&self, peripheral: Peripheral) -> bool {
+    pub fn get_enable(&self, peripheral: Peripheral) -> bool {
         if !self.serves_peripheral(peripheral) {
             panic!("AHBENR::get_enable - this register does not control the specified peripheral!");
         }
@@ -139,7 +139,7 @@ impl AHBENR {
         self.0 & mask != 0
     }
 
-    fn set_enable(&mut self, enable: bool, peripheral: Peripheral) {
+    pub fn set_enable(&mut self, enable: bool, peripheral: Peripheral) {
         if !self.serves_peripheral(peripheral) {
             panic!("AHBENR::enable - This register does not control the specified peripheral!");
         }
@@ -151,7 +151,7 @@ impl AHBENR {
         }
     }
 
-    fn serves_peripheral(&self, peripheral: Peripheral) -> bool {
+    pub fn serves_peripheral(&self, peripheral: Peripheral) -> bool {
         match peripheral {
             Peripheral::TouchSenseController | Peripheral::GPIOA |
             Peripheral::GPIOB | Peripheral::GPIOC | Peripheral::GPIOF |
@@ -166,7 +166,7 @@ impl AHBENR {
 pub struct APBENR1(u32);
 
 impl APBENR1 {
-    fn get_enable(&self, peripheral: Peripheral) -> bool {
+    pub fn get_enable(&self, peripheral: Peripheral) -> bool {
         if !self.serves_peripheral(peripheral) {
             panic!("APBENR1::get_enable - this register does not control the specified peripheral!");
         }
@@ -175,7 +175,7 @@ impl APBENR1 {
         self.0 & mask != 0
     }
 
-    fn set_enable(&mut self, enable: bool, peripheral: Peripheral) {
+    pub fn set_enable(&mut self, enable: bool, peripheral: Peripheral) {
         if !self.serves_peripheral(peripheral) {
             panic!("APBENR1::enable - This register does not control the specified peripheral!");
         }
@@ -187,7 +187,7 @@ impl APBENR1 {
         }
     }
 
-    fn serves_peripheral(&self, peripheral: Peripheral) -> bool {
+    pub fn serves_peripheral(&self, peripheral: Peripheral) -> bool {
         match peripheral {
             Peripheral::CEC | Peripheral::DAC | Peripheral::PowerInterface |
             Peripheral::ClockRecoverySystem | Peripheral::CAN | Peripheral::USB |
@@ -204,7 +204,7 @@ impl APBENR1 {
 pub struct APBENR2(u32);
 
 impl APBENR2 {
-    fn get_enable(&self, peripheral: Peripheral) -> bool {
+    pub fn get_enable(&self, peripheral: Peripheral) -> bool {
         if !self.serves_peripheral(peripheral) {
             panic!("APBENR2::get_enable - this register does not control the specified peripheral!");
         }
@@ -213,7 +213,7 @@ impl APBENR2 {
         self.0 & mask != 0
     }
 
-    fn set_enable(&mut self, enable: bool, peripheral: Peripheral) {
+    pub fn set_enable(&mut self, enable: bool, peripheral: Peripheral) {
         if !self.serves_peripheral(peripheral) {
             panic!("APBENR2::enable - This register does not control the specified peripheral!");
         }
@@ -225,7 +225,7 @@ impl APBENR2 {
         }
     }
 
-    fn serves_peripheral(&self, peripheral: Peripheral) -> bool {
+    pub fn serves_peripheral(&self, peripheral: Peripheral) -> bool {
         match peripheral {
             Peripheral::MCUDebug | Peripheral::TIM1 | Peripheral::TIM15 |
             Peripheral::TIM16 | Peripheral::TIM17 | Peripheral::USART1 |
