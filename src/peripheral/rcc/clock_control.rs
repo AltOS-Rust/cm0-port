@@ -17,7 +17,6 @@
 
 //! This module handles the clock control register of the CRR.
 
-use super::super::Register;
 use super::defs::*;
 
 pub mod clock_rate {
@@ -125,24 +124,8 @@ impl ClockControl {
 
 /// The CR register only controls the PLL, HSE, and HSI clocks. If another clock is passed in as an
 /// argument to any of the methods that take a clock argument, the kernel will panic.
-#[derive(Copy, Clone)]
-pub struct CR {
-    base_addr: *const u32,
-}
-
-impl Register for CR {
-    fn new(base_addr: *const u32) -> Self {
-        CR { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        CR_OFFSET
-    }
-}
+#[derive(Copy, Clone, Debug)]
+pub struct CR(u32);
 
 impl CR {
     /// Set a clock to be on if `enable` is true, off otherwise. If `enable` is true, the return
@@ -156,16 +139,13 @@ impl CR {
             _ => panic!("CR::enable_clock - argument clock is not controlled by this register!"),
         };
 
-        unsafe {
-            let mut reg = self.addr();
-            if enable {
-                *reg |= mask;
-                true
-            }
-            else {
-                *reg &= !mask;
-                (*reg & mask) == 0
-            }
+        if enable {
+            self.0 |= mask;
+            true
+        }
+        else {
+            self.0 &= !mask;
+            (self.0 & mask) == 0
         }
     }
 
@@ -178,10 +158,7 @@ impl CR {
             _ => panic!("CR::clock_is_on - argument clock is not controlled by thsi register!"),
         };
 
-        unsafe {
-            let reg = self.addr();
-            (*reg & mask) != 0
-        }
+        (self.0 & mask) != 0
     }
 
     /// Return true if the specified clock is ready for use.
@@ -193,33 +170,14 @@ impl CR {
             _ => panic!("CR::clock_is_ready - argument clock is not controlled by this register!"),
         };
 
-        unsafe {
-            let reg = self.addr();
-            (*reg & mask) != 0
-        }
+        (self.0 & mask) != 0
     }
 }
 
 /// The CR2 register only controls the HSI48 and HSI14 clocks. If another clock is passed in as an
 /// argument to any of the methods that take a clock argument, the kernel will panic.
-#[derive(Copy, Clone)]
-pub struct CR2 {
-    base_addr: *const u32,
-}
-
-impl Register for CR2 {
-    fn new(base_addr: *const u32) -> Self {
-        CR2 { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        CR2_OFFSET
-    }
-}
+#[derive(Copy, Clone, Debug)]
+pub struct CR2(u32);
 
 impl CR2 {
     /// Set a clock to be on if `enable` is true, off otherwise. If `enable` is true, the return
@@ -232,16 +190,13 @@ impl CR2 {
             _ => panic!("CR2::set_clock - argument clock is not controlled by this register!"),
         };
 
-        unsafe {
-            let mut reg = self.addr();
-            if enable {
-                *reg |= mask;
-                true
-            }
-            else {
-                *reg &= !mask;
-                (*reg & mask) == 0
-            }
+        if enable {
+            self.0 |= mask;
+            true
+        }
+        else {
+            self.0 &= !mask;
+            self.0 & mask) == 0
         }
     }
 
@@ -253,10 +208,7 @@ impl CR2 {
             _ => panic!("CR2::clock_is_on - argument clock is not controlled by this register!"),
         };
 
-        unsafe {
-            let reg = self.addr();
-            (*reg & mask) != 0
-        }
+        self.0 & mask) != 0
     }
 
     /// Return true if the specified clock is ready for use.
@@ -267,9 +219,6 @@ impl CR2 {
             _ => panic!("CR2::clock_is_ready - argument clock is not controlled by this register!"),
         };
 
-        unsafe {
-            let reg = self.addr();
-            (*reg & mask) != 0
-        }
+        (self.0 & mask) != 0
     }
 }

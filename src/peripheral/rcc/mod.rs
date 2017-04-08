@@ -37,29 +37,46 @@ pub fn rcc() -> RCC {
 
 /// Reset and Clock Controller
 #[derive(Copy, Clone)]
-pub struct RCC {
-    mem_addr: *const u32,
-    cr: clock_control::ClockControl,
-    cfgr: config::ConfigControl,
-    enr: enable::PeripheralControl,
+pub struct RawRCC {
+    cr: CR,
+    cfgr: CFGR,
+    cir: u32,
+    apb2rstr: u32,
+    apb1rstr: u32,
+    ahbenr: AHBENR,
+    apbenr2: APBENR2,
+    apbenr1: APBENR1,
+    bdcr: u32,
+    csr, u32,
+    ahbrstr, u32,
+    cfgr2: CFGR2,
+    cfgr3: u32,
+    cr2: CR2,
 }
 
-impl Control for RCC {
-    unsafe fn mem_addr(&self) -> Volatile<u32> {
-        Volatile::new(self.mem_addr)
-    }
-}
+pub struct RCC(Volatile<RawRCC>);
 
 impl RCC {
     fn rcc() -> Self {
-        RCC {
-            mem_addr: RCC_ADDR,
-            cr: clock_control::ClockControl::new(RCC_ADDR),
-            cfgr: config::ConfigControl::new(RCC_ADDR),
-            enr: enable::PeripheralControl::new(RCC_ADDR),
-        }
+        RCC(Volatile::new(RCC_ADDR as *const _));
     }
+}
 
+impl Deref for RCC {
+    type Target = RawRCC;
+
+    fn deref(&self) -> &Self::Target {
+        &*(self.0)
+    }
+}
+
+impl DerefMut for RCC {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut *(self.0)
+    }
+}
+
+impl RawRCC {
     /// Enable the specified clock.
     pub fn enable_clock(&mut self, clock: Clock) {
         self.cr.enable_clock(clock);
