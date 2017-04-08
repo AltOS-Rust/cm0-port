@@ -36,8 +36,15 @@ pub fn scb() -> SCB {
 #[repr(C)]
 #[doc(hidden)]
 pub struct RawSCB {
-    unused: u32,
-    icsr: icsr::ICSR,
+    cpuid: u32,
+    icsr: ICSR,
+    reserved1: u32,
+    aircr: u32,
+    scr: u32,
+    ccr: u32,
+    reserved2: u32,
+    shpr2: u32,
+    shpr3: u32,
 }
 
 #[derive(Copy, Clone, Debug)]
