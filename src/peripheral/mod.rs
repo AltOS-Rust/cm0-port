@@ -43,31 +43,6 @@ macro_rules! pad_field {
     }
 }
 
-/// Defines the base address for a block of Control registers for a given peripheral.
-pub trait Control {
-    /// Base address for the given peripheral.
-    unsafe fn mem_addr(&self) -> Volatile<u32>;
-}
-
-/// Define a register mapping for a given peripheral.
-///
-/// Uses the base address and the offset of the peripheral to calculate the
-/// memory address of the peripheral register.
-pub trait Register {
-    /// Create a new instance of the peripheral register with its base address.
-    fn new(base_addr: *const u32) -> Self;
-    /// Return the base address for the given peripheral.
-    fn base_addr(&self) -> *const u32;
-    /// Return the offset from the base address of the given peripheral.
-    fn mem_offset(&self) -> u32;
-    /// Return volatile pointer to the memory address of the peripheral register.
-    unsafe fn addr(&self) -> Volatile<u32> {
-        // We cast to a u8 so the pointer offset is not multiplied
-        let addr = self.base_addr() as *const u8;
-        Volatile::new(addr.offset(self.mem_offset() as isize) as *const u32)
-    }
-}
-
 /// Defines a bit field within a register.
 pub trait Field {
     /// Return the bit mask for the register bit field.
