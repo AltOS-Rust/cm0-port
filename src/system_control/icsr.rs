@@ -18,37 +18,15 @@
 use ::peripheral::Register;
 use super::defs::*;
 
-#[derive(Copy, Clone)]
-pub struct ICSR {
-    base_addr: *const u32,
-}
-
-impl Register for ICSR {
-    fn new(base_addr: *const u32) -> Self {
-        ICSR { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        ICSR_OFFSET
-    }
-}
+#[derive(Copy, Clone, Debug)]
+pub struct ICSR(u32);
 
 impl ICSR {
     pub fn set_pend_sv(&mut self) {
-        unsafe {
-            let mut reg = self.addr();
-            *reg |= ICSR_PENDSVSET;
-        }
+        self.0 |= ICSR_PENDSVSET;
     }
 
     pub fn clear_pend_sv(&mut self) {
-        unsafe {
-            let mut reg = self.addr();
-            *reg |= ICSR_PENDSVCLR;
-        }
+        self.0 |= ICSR_PENDSVCLR;
     }
 }
