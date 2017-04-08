@@ -17,14 +17,19 @@
 
 //! This module handles the memory mapped peripherals that are a part of the Cortex-M0. Submodules
 //! will handle the more specific details of each peripheral.
-
 pub mod rcc;
 pub mod gpio;
 pub mod systick;
 #[cfg(feature="serial")]
 pub mod usart;
 
+use core::ops::{Deref, MutDeref};
 use volatile::Volatile;
+use self::reload_value::RVR;
+use self::current_value::CVR;
+use self::control_status::CSR;
+
+pub use self::control_status::ClockSource;
 
 #[macro_export]
 macro_rules! pad_field {

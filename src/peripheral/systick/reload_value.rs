@@ -15,37 +15,17 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-use super::super::Register;
 use super::defs::*;
 
 /// The Reload Value Register specifies the start value to load into the SYST_CVR
 /// (Current Value Register).
-#[derive(Copy, Clone)]
-pub struct RVR {
-    base_addr: *const u32,
-}
-
-impl Register for RVR {
-    fn new(base_addr: *const u32) -> Self {
-        RVR { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        RVR_OFFSET
-    }
-}
+#[derive(Copy, Clone, Debug)]
+pub struct RVR(u32);
 
 impl RVR {
     /// Return the reload value of the register.
     pub fn get_reload_value(&self) -> u32 {
-        unsafe {
-            let reg = self.addr();
-            *reg & RELOAD
-        }
+        self.0 & RELOAD
     }
 
     /// Set the reload value of the register. It must be <= 0xFFFFFF or the kernel will panic.
@@ -54,9 +34,6 @@ impl RVR {
             panic!("RVR::set_reload_value - the value of the reload register must be <= 0xFFFFFF!");
         }
 
-        unsafe {
-            let mut reg = self.addr();
-            reg.store(value);
-        }
+        self.0 = value;
     }
 }
