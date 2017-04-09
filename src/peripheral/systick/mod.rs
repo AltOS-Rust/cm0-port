@@ -22,9 +22,14 @@ mod reload_value;
 mod current_value;
 mod defs;
 
-use super::{Control, Register};
+use core::ops::{Deref, DerefMut};
 use volatile::Volatile;
 use self::defs::*;
+use self::control_status::CSR;
+use self::current_value::CVR;
+use self::reload_value::RVR;
+
+pub use self::control_status::ClockSource;
 
 /// Returns an instance of the SysTick to modify system tick behavior.
 pub fn systick() -> SysTick {
@@ -32,30 +37,42 @@ pub fn systick() -> SysTick {
 }
 
 /// Control system tick behavior.
-#[derive(Copy, Clone)]
-pub struct SysTick {
-    mem_addr: *const u32,
-    csr: control_status::CSR,
-    rvr: reload_value::RVR,
-    cvr: current_value::CVR,
+#[derive(Copy, Clone, Debug)]
+#[repr(C)]
+#[doc(hidden)]
+pub struct RawSysTick {
+    csr: CSR,
+    rvr: RVR,
+    cvr: CVR,
+    calib: u32,
 }
 
-impl Control for SysTick {
-    unsafe fn mem_addr(&self) -> Volatile<u32> {
-        Volatile::new(self.mem_addr)
-    }
-}
+#[derive(Copy, Clone, Debug)]
+pub struct SysTick(Volatile<RawSysTick>);
 
 impl SysTick {
     fn systick() -> Self {
-        SysTick {
-            mem_addr: SYSTICK_ADDR,
-            csr: control_status::CSR::new(SYSTICK_ADDR),
-            rvr: reload_value::RVR::new(SYSTICK_ADDR),
-            cvr: current_value::CVR::new(SYSTICK_ADDR),
+        unsafe {
+            SysTick(Volatile::new(SYSTICK_ADDR as *const _))
         }
     }
+}
 
+impl Deref for SysTick {
+    type Target = RawSysTick;
+
+    fn deref(&self) -> &Self::Target {
+        &*(self.0)
+    }
+}
+
+impl DerefMut for SysTick {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut *(self.0)
+    }
+}
+
+impl RawSysTick {
     /// Enable system tick counter.
     ///
     /// When enabled, counter value will decrement after each clock cycle
@@ -91,6 +108,11 @@ impl SysTick {
         self.csr.set_source(control_status::ClockSource::Reference);
     }
 
+    /// Check if counter reached zero.
+    pub fn did_underflow(&self) -> bool {
+        self.csr.did_underflow()
+    }
+
     /// Get the reload value for the counter.
     pub fn get_reload_value(&self) -> u32 {
         self.rvr.get_reload_value()
@@ -109,10 +131,5 @@ impl SysTick {
     /// Clear the counter value.
     pub fn clear_current_value(&mut self) {
         self.cvr.clear_current_value();
-    }
-
-    /// Check if counter reached zero.
-    pub fn did_underflow(&self) -> bool {
-        self.csr.did_underflow()
     }
 }

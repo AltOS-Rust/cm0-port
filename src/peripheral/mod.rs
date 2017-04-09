@@ -17,7 +17,6 @@
 
 //! This module handles the memory mapped peripherals that are a part of the Cortex-M0. Submodules
 //! will handle the more specific details of each peripheral.
-
 pub mod rcc;
 pub mod gpio;
 pub mod systick;

@@ -15,7 +15,6 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-use super::super::Register;
 use super::defs::*;
 
 pub enum ClockSource {
@@ -24,65 +23,37 @@ pub enum ClockSource {
 }
 
 /// The control and status register for the SysTick timer.
-#[derive(Copy, Clone)]
-pub struct CSR {
-    base_addr: *const u32,
-}
-
-impl Register for CSR {
-    fn new(base_addr: *const u32) -> Self {
-        CSR { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        CSR_OFFSET
-    }
-}
+#[derive(Copy, Clone, Debug)]
+pub struct CSR(u32);
 
 impl CSR {
     pub fn set_enable(&mut self, enable: bool) {
-        unsafe {
-            let mut reg = self.addr();
-            if enable {
-                *reg |= ENABLE;
-            }
-            else {
-                *reg &= !ENABLE;
-            }
+        if enable {
+            self.0 |= ENABLE;
+        }
+        else {
+            self.0 &= !ENABLE;
         }
     }
 
     pub fn set_interrupt(&mut self, enable: bool) {
-        unsafe {
-            let mut reg = self.addr();
-            if enable {
-                *reg |= TICKINT;
-            }
-            else {
-                *reg &= !TICKINT;
-            }
+        if enable {
+            self.0 |= TICKINT;
+        }
+        else {
+            self.0 &= !TICKINT;
         }
     }
 
     pub fn set_source(&mut self, source: ClockSource) {
-        unsafe {
-            let mut reg = self.addr();
-            match source {
-                ClockSource::Reference => *reg &= !CLKSOURCE,
-                ClockSource::Processor => *reg |= CLKSOURCE,
-            };
-        }
+        match source {
+            ClockSource::Reference => self.0 &= !CLKSOURCE,
+            ClockSource::Processor => self.0 |= CLKSOURCE,
+        };
     }
 
     /// Returns true if the counter has reached zero since the last time it was checked.
     pub fn did_underflow(&self) -> bool {
-        unsafe {
-            let reg = self.addr();
-            *reg & COUNTFLAG != 0
-        }
+        (self.0 & COUNTFLAG) != 0
     }
 }
