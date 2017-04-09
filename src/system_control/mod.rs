@@ -21,8 +21,9 @@
 mod icsr;
 mod defs;
 
+use core::ops::{Deref, DerefMut};
 use ::volatile::Volatile;
-use ::peripheral::{Control, Register};
+use self::icsr::ICSR;
 use self::defs::*;
 
 /// Returns instance of the System Control Block.
@@ -31,26 +32,48 @@ pub fn scb() -> SCB {
 }
 
 /// System Control Block
-#[derive(Copy, Clone)]
-pub struct SCB {
-    mem_addr: *const u32,
-    icsr: icsr::ICSR,
+#[derive(Copy, Clone, Debug)]
+#[repr(C)]
+#[doc(hidden)]
+pub struct RawSCB {
+    cpuid: u32,
+    icsr: ICSR,
+    reserved1: u32,
+    aircr: u32,
+    scr: u32,
+    ccr: u32,
+    reserved2: u32,
+    shpr2: u32,
+    shpr3: u32,
 }
 
-impl Control for SCB {
-    unsafe fn mem_addr(&self) -> Volatile<u32> {
-        Volatile::new(self.mem_addr)
-    }
-}
+#[derive(Copy, Clone, Debug)]
+pub struct SCB(Volatile<RawSCB>);
 
 impl SCB {
     fn scb() -> Self {
-        SCB {
-            mem_addr: SCB_ADDR,
-            icsr: icsr::ICSR::new(SCB_ADDR),
+        unsafe {
+            SCB(Volatile::new(SCB_ADDR as *const _))
         }
     }
+}
 
+impl Deref for SCB {
+    type Target = RawSCB;
+
+    fn deref(&self) -> &Self::Target {
+        &*(self.0)
+    }
+}
+
+
+impl DerefMut for SCB {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut *(self.0)
+    }
+}
+
+impl RawSCB {
     /// Trigger a pend_sv exception.
     ///
     /// PendSV signals to the operating system that a context switch should occur.
