@@ -235,3 +235,203 @@ impl APBENR2 {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ahbenr_get_enable() {
+        // GPIO Group A starts enabled
+        let ahbenr = AHBENR(0b1 << 17);
+
+        assert_eq!(ahbenr.get_enable(Peripheral::GPIOA), true);
+        assert_eq!(ahbenr.get_enable(Peripheral::GPIOB), false);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_ahbenr_get_enable_unserved_peripheral_panics() {
+        let ahbenr = AHBENR(0);
+
+        ahbenr.get_enable(Peripheral::USART1);
+    }
+
+    #[test]
+    fn test_ahbenr_set_enable_on() {
+        let mut ahbenr = AHBENR(0);
+
+        ahbenr.set_enable(true, Peripheral::GPIOB);
+        assert_eq!(ahbenr.0, 0b1 << 18);
+    }
+
+    #[test]
+    fn test_ahbenr_set_enable_off() {
+        // CRC starts enabled
+        let mut ahbenr = AHBENR(0b1 << 6);
+
+        ahbenr.set_enable(false, Peripheral::CRC);
+        assert_eq!(ahbenr.0, 0);
+    }
+
+    #[test]
+    fn test_ahbenr_set_enable_on_multiple_peripherals_doesnt_change_settings() {
+        let mut ahbenr = AHBENR(0);
+
+        ahbenr.set_enable(true, Peripheral::GPIOA);
+        assert_eq!(ahbenr.0, 0b1 << 17);
+
+        ahbenr.set_enable(true, Peripheral::CRC);
+        assert_eq!(ahbenr.0, 0b1 << 6 | 0b1 << 17);
+    }
+
+    #[test]
+    fn test_ahbenr_set_enable_off_multiple_peripherals_doesnt_change_settings() {
+        // SRAM and GPIOB start enabled
+        let mut ahbenr = AHBENR(0b1 << 2 | 0b1 << 18);
+
+        ahbenr.set_enable(false, Peripheral::GPIOB);
+        assert_eq!(ahbenr.0, 0b1 << 2);
+
+        ahbenr.set_enable(false, Peripheral::SRAMInterface);
+        assert_eq!(ahbenr.0, 0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_ahbenr_set_enable_unserved_peripheral_panics() {
+        let mut ahbenr = AHBENR(0);
+
+        ahbenr.set_enable(true, Peripheral::USART1);
+    }
+
+    #[test]
+    fn test_apbenr1_get_enable() {
+        // USB starts enabled
+        let apbenr1 = APBENR1(0b1 << 23);
+
+        assert_eq!(apbenr1.get_enable(Peripheral::USB), true);
+        assert_eq!(apbenr1.get_enable(Peripheral::CEC), false);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_apbenr1_get_enable_unserved_peripheral_panics() {
+        let apbenr1 = APBENR1(0);
+
+        apbenr1.get_enable(Peripheral::GPIOA);
+    }
+
+    #[test]
+    fn test_apbenr1_set_enable_on() {
+        let mut apbenr1 = APBENR1(0);
+
+        apbenr1.set_enable(true, Peripheral::USART2);
+        assert_eq!(apbenr1.0, 0b1 << 17);
+    }
+
+    #[test]
+    fn test_apbenr1_set_enable_off() {
+        // SPI2 starts enabled
+        let mut apbenr1 = APBENR1(0b1 << 14);
+
+        apbenr1.set_enable(false, Peripheral::SPI2);
+        assert_eq!(apbenr1.0, 0);
+    }
+
+    #[test]
+    fn test_apbenr1_set_enable_on_multiple_peripherals_doesnt_change_settings() {
+        let mut apbenr1 = APBENR1(0);
+
+        apbenr1.set_enable(true, Peripheral::USART2);
+        assert_eq!(apbenr1.0, 0b1 << 17);
+
+        apbenr1.set_enable(true, Peripheral::SPI2);
+        assert_eq!(apbenr1.0, 0b1 << 14 | 0b1 << 17);
+    }
+
+    #[test]
+    fn test_apbenr1_set_enable_off_multiple_peripherals_doesnt_change_settings() {
+        // TIM3 and PWR start enabled
+        let mut apbenr1 = APBENR1(0b1 << 1 | 0b1 << 28);
+
+        apbenr1.set_enable(false, Peripheral::PowerInterface);
+        assert_eq!(apbenr1.0, 0b1 << 1);
+
+        apbenr1.set_enable(false, Peripheral::TIM3);
+        assert_eq!(apbenr1.0, 0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_apbenr1_set_enable_unserved_peripheral_panics() {
+        let mut apbenr1 = APBENR1(0);
+
+        apbenr1.set_enable(true, Peripheral::GPIOA);
+    }
+
+    #[test]
+    fn test_apbenr2_get_enable() {
+        // USART1 starts enabled
+        let apbenr2 = APBENR2(0b1 << 14);
+
+        assert_eq!(apbenr2.get_enable(Peripheral::USART1), true);
+        assert_eq!(apbenr2.get_enable(Peripheral::SPI1), false);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_apbenr2_get_enable_unserved_peripheral_panics() {
+        let apbenr2 = APBENR2(0);
+
+        apbenr2.get_enable(Peripheral::GPIOA);
+    }
+
+    #[test]
+    fn test_apbenr2_set_enable_on() {
+        let mut apbenr2 = APBENR2(0);
+
+        apbenr2.set_enable(true, Peripheral::ADC);
+        assert_eq!(apbenr2.0, 0b1 << 9);
+    }
+
+    #[test]
+    fn test_apbenr2_set_enable_off() {
+        // USART1 starts enabled
+        let mut apbenr2 = APBENR2(0b1 << 14);
+
+        apbenr2.set_enable(false, Peripheral::USART1);
+        assert_eq!(apbenr2.0, 0);
+    }
+
+    #[test]
+    fn test_apbenr2_set_enable_on_multiple_peripherals_doesnt_change_settings() {
+        let mut apbenr2 = APBENR2(0);
+
+        apbenr2.set_enable(true, Peripheral::TIM17);
+        assert_eq!(apbenr2.0, 0b1 << 18);
+
+        apbenr2.set_enable(true, Peripheral::SysCfgComp);
+        assert_eq!(apbenr2.0, 0b1 | 0b1 << 18);
+    }
+
+    #[test]
+    fn test_apbenr2_set_enable_off_multiple_peripherals_doesnt_change_settings() {
+        // DBGMCU and USART6 start enabled
+        let mut apbenr2 = APBENR2(0b1 << 5 | 0b1 << 22);
+
+        apbenr2.set_enable(false, Peripheral::MCUDebug);
+        assert_eq!(apbenr2.0, 0b1 << 5);
+
+        apbenr2.set_enable(false, Peripheral::USART6);
+        assert_eq!(apbenr2.0, 0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_apbenr2_set_enable_unserved_peripheral_panics() {
+        let mut apbenr2 = APBENR2(0);
+
+        apbenr2.set_enable(true, Peripheral::GPIOA);
+    }
+}

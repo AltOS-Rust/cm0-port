@@ -120,3 +120,127 @@ impl CFGR2 {
         self.0 |= mask;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_cfgr_get_system_clock_source() {
+        // PLL starts as source
+        let cfgr = CFGR(0b10 << 2);
+
+        assert_eq!(cfgr.get_system_clock_source(), Clock::PLL);
+    }
+
+    #[test]
+    fn test_cfgr_set_system_clock_source() {
+        let mut cfgr = CFGR(0);
+
+        cfgr.set_system_clock_source(Clock::PLL);
+        assert_eq!(cfgr.0, 0b10);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cfgr_set_system_clock_source_invalid_clock_panics() {
+        let mut cfgr = CFGR(0);
+
+        cfgr.set_system_clock_source(Clock::HSI14);
+    }
+
+    #[test]
+    fn test_cfgr_get_pll_source() {
+        let cfgr = CFGR(0b01 << 15);
+
+        assert_eq!(cfgr.get_pll_source(), Clock::HSI);
+    }
+
+    #[test]
+    fn test_cfgr_set_pll_source() {
+        let mut cfgr = CFGR(0);
+
+        cfgr.set_pll_source(Clock::HSE);
+        assert_eq!(cfgr.0, 0b10 << 15);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cfgr_set_pll_source_invalid_clock_panics() {
+        let mut cfgr = CFGR(0);
+
+        cfgr.set_pll_source(Clock::PLL);
+    }
+
+    #[test]
+    fn test_cfgr_get_pll_multiplier() {
+        // Multiplier field starts at 8, should get 10 out
+        let cfgr = CFGR(0b1000 << 18);
+
+        assert_eq!(cfgr.get_pll_multiplier(), 10);
+    }
+
+    #[test]
+    fn test_cfgr_get_pll_multiplier_saturates_at_16() {
+        // Multiplier field starts at 15, should get 16 out
+        let cfgr = CFGR(0b1111 << 18);
+
+        assert_eq!(cfgr.get_pll_multiplier(), 16);
+    }
+
+    #[test]
+    fn test_cfgr_set_pll_multiplier() {
+        let mut cfgr = CFGR(0);
+
+        cfgr.set_pll_multiplier(8);
+        assert_eq!(cfgr.0, 0b0110 << 18);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cfgr_set_pll_multiplier_less_than_2_panics() {
+        let mut cfgr = CFGR(0);
+
+        cfgr.set_pll_multiplier(1);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cfgr_set_pll_multiplier_greater_than_16_panics() {
+        let mut cfgr = CFGR(0);
+
+        cfgr.set_pll_multiplier(17);
+    }
+
+    #[test]
+    fn test_cfgr2_get_pll_prediv_factor() {
+        // Prediv factor field starts at 12, should get 13 out
+        let cfgr2 = CFGR2(0b1100);
+
+        assert_eq!(cfgr2.get_pll_prediv_factor(), 13);
+    }
+
+    #[test]
+    fn test_cfgr2_set_pll_prediv_factor() {
+        let mut cfgr2 = CFGR2(0);
+
+        cfgr2.set_pll_prediv_factor(10);
+        assert_eq!(cfgr2.0, 0b1001);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cfgr2_set_pll_prediv_factor_0_panics() {
+        let mut cfgr2 = CFGR2(0);
+
+        cfgr2.set_pll_prediv_factor(0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cfgr2_set_pll_prediv_factor_greater_than_16_panics() {
+        let mut cfgr2 = CFGR2(0);
+
+        cfgr2.set_pll_prediv_factor(17);
+    }
+}

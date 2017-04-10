@@ -61,6 +61,7 @@ pub mod clock_rate {
 }
 
 /// Defines available system clocks.
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Clock {
     /// High Speed Internal: 8 MHz
     HSI,
@@ -80,14 +81,20 @@ pub enum Clock {
 pub struct CR(u32);
 
 impl CR {
-    /// Set a clock to be on if `enable` is true, off otherwise. If `enable` is true, the return
-    /// value is always true. If `enable` is false, the return value will be true if the clock was
-    /// successfully disabled.
+    /// Set a clock to be on if `enable` is true, off otherwise.
+    ///
+    /// If `enable` is true, the return value is always true. If `enable` is false, the return
+    /// value will be true if the clock was successfully disabled.
+    ///
+    /// # Panics
+    ///
+    /// If the clock passed in is not one of `PLL`, `HSE`, or `HSI`, this function will panic as
+    /// the CR register only has control over those clocks.
     pub fn set_clock(&mut self, enable: bool, clock: Clock) -> bool {
         let mask = match clock {
-            Clock::PLL => PLLON,
-            Clock::HSE => HSEON,
-            Clock::HSI => HSION,
+            Clock::PLL => CR_PLLON,
+            Clock::HSE => CR_HSEON,
+            Clock::HSI => CR_HSION,
             _ => panic!("CR::enable_clock - argument clock is not controlled by this register!"),
         };
 
@@ -102,11 +109,16 @@ impl CR {
     }
 
     /// Return true if the specified clock is enabled.
+    ///
+    /// # Panics
+    ///
+    /// If the clock passed in is not one of `PLL`, `HSE`, or `HSI`, this function will panic as
+    /// the CR register only has control over those clocks.
     pub fn clock_is_on(&self, clock: Clock) -> bool {
         let mask = match clock {
-            Clock::PLL => PLLON,
-            Clock::HSE => HSEON,
-            Clock::HSI => HSION,
+            Clock::PLL => CR_PLLON,
+            Clock::HSE => CR_HSEON,
+            Clock::HSI => CR_HSION,
             _ => panic!("CR::clock_is_on - argument clock is not controlled by thsi register!"),
         };
 
@@ -114,11 +126,16 @@ impl CR {
     }
 
     /// Return true if the specified clock is ready for use.
+    ///
+    /// # Panics
+    ///
+    /// If the clock passed in is not one of `PLL`, `HSE`, or `HSI`, this function will panic as
+    /// the CR register only has control over those clocks.
     pub fn clock_is_ready(&self, clock: Clock) -> bool {
         let mask = match clock {
-            Clock::PLL => PLLRDY,
-            Clock::HSE => HSERDY,
-            Clock::HSI => HSIRDY,
+            Clock::PLL => CR_PLLRDY,
+            Clock::HSE => CR_HSERDY,
+            Clock::HSI => CR_HSIRDY,
             _ => panic!("CR::clock_is_ready - argument clock is not controlled by this register!"),
         };
 
@@ -132,9 +149,15 @@ impl CR {
 pub struct CR2(u32);
 
 impl CR2 {
-    /// Set a clock to be on if `enable` is true, off otherwise. If `enable` is true, the return
-    /// value is always true. If `enable` is false, the return value will be true if the clock was
-    /// successfully disabled.
+    /// Set a clock to be on if `enable` is true, off otherwise.
+    ///
+    /// If `enable` is true, the return value is always true. If `enable` is false, the return
+    /// value will be true if the clock was successfully disabled.
+    ///
+    /// # Panics
+    ///
+    /// If the clock passed in is not one of `HSI14` or `HSI48`, this function will panic as
+    /// the CR2 register only has control over those clocks.
     pub fn set_clock(&mut self, enable: bool, clock: Clock) -> bool {
         let mask = match clock {
             Clock::HSI48 => CR2_HSI48ON,
@@ -153,6 +176,11 @@ impl CR2 {
     }
 
     /// Return true if the specified clock is enabled.
+    ///
+    /// # Panics
+    ///
+    /// If the clock passed in is not one of `HSI14` or `HSI48`, this function will panic as
+    /// the CR2 register only has control over those clocks.
     pub fn clock_is_on(&self, clock: Clock) -> bool {
         let mask = match clock {
             Clock::HSI48 => CR2_HSI48ON,
@@ -164,6 +192,11 @@ impl CR2 {
     }
 
     /// Return true if the specified clock is ready for use.
+    ///
+    /// # Panics
+    ///
+    /// If the clock passed in is not one of `HSI14` or `HSI48`, this function will panic as
+    /// the CR2 register only has control over those clocks.
     pub fn clock_is_ready(&self, clock: Clock) -> bool {
         let mask = match clock {
             Clock::HSI48 => CR2_HSI48RDY,
@@ -172,5 +205,210 @@ impl CR2 {
         };
 
         (self.0 & mask) != 0
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_cr_set_clock_on() {
+        let mut cr = CR(0);
+
+        cr.set_clock(true, Clock::PLL);
+        assert_eq!(cr.0, 0b1 << 24);
+    }
+
+    #[test]
+    fn test_cr_set_clock_off() {
+        // PLL starts on
+        let mut cr = CR(0b1 << 24);
+
+        cr.set_clock(false, Clock::PLL);
+        assert_eq!(cr.0, 0);
+    }
+
+    #[test]
+    fn test_cr_set_clock_on_multiple_clocks_doesnt_change_other_clocks() {
+        let mut cr = CR(0);
+
+        cr.set_clock(true, Clock::PLL);
+        assert_eq!(cr.0, 0b1 << 24);
+
+        cr.set_clock(true, Clock::HSI);
+        assert_eq!(cr.0, 0b1 | 0b1 << 24);
+    }
+
+    #[test]
+    fn test_cr_set_clock_off_multiple_clocks_doesnt_change_other_clocks() {
+        // HSI and PLL start on
+        let mut cr = CR(0b1 | 0b1 << 24);
+
+        cr.set_clock(false, Clock::HSI);
+        assert_eq!(cr.0, 0b1 << 24);
+
+        cr.set_clock(false, Clock::PLL);
+        assert_eq!(cr.0, 0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cr_set_clock_unhandled_clock_panics() {
+        let mut cr = CR(0);
+
+        cr.set_clock(true, Clock::HSI48);
+    }
+
+    #[test]
+    fn test_cr_clock_is_on_all_clocks_off() {
+        let cr = CR(0);
+
+        assert_eq!(cr.clock_is_on(Clock::PLL), false);
+        assert_eq!(cr.clock_is_on(Clock::HSI), false);
+        assert_eq!(cr.clock_is_on(Clock::HSE), false);
+    }
+
+    #[test]
+    fn test_cr_clock_is_on_all_clocks_on() {
+        // HSI, HSE, and PLL start on
+        let cr = CR(0b1 | 0b1 << 16 | 0b1 << 24);
+
+        assert_eq!(cr.clock_is_on(Clock::PLL), true);
+        assert_eq!(cr.clock_is_on(Clock::HSI), true);
+        assert_eq!(cr.clock_is_on(Clock::HSE), true);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cr_clock_is_on_unhandled_clock_panics() {
+        let cr = CR(0);
+
+        cr.clock_is_on(Clock::HSI48);
+    }
+
+    #[test]
+    fn test_cr_clock_is_ready_all_clocks_not_ready() {
+        let cr = CR(0);
+
+        assert_eq!(cr.clock_is_ready(Clock::PLL), false);
+        assert_eq!(cr.clock_is_ready(Clock::HSI), false);
+        assert_eq!(cr.clock_is_ready(Clock::HSE), false);
+    }
+
+    #[test]
+    fn test_cr_clock_is_ready_all_clocks_ready() {
+        // HSI, HSE, and PLL start ready
+        let cr = CR(0b1 << 1 | 0b1 << 17 | 0b1 << 25);
+
+        assert_eq!(cr.clock_is_ready(Clock::PLL), true);
+        assert_eq!(cr.clock_is_ready(Clock::HSI), true);
+        assert_eq!(cr.clock_is_ready(Clock::HSE), true);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cr_clock_is_ready_unhandled_clock_panics() {
+        let cr = CR(0);
+
+        cr.clock_is_ready(Clock::HSI48);
+    }
+
+    #[test]
+    fn test_cr2_set_clock_on() {
+        let mut cr2 = CR2(0);
+
+        cr2.set_clock(true, Clock::HSI48);
+        assert_eq!(cr2.0, 0b1 << 16);
+    }
+
+    #[test]
+    fn test_cr2_set_clock_off() {
+        // HSI48 starts on
+        let mut cr2 = CR2(0b1 << 16);
+
+        cr2.set_clock(false, Clock::HSI48);
+        assert_eq!(cr2.0, 0);
+    }
+
+    #[test]
+    fn test_cr2_set_clock_on_multiple_clocks_doesnt_change_other_clocks() {
+        let mut cr2 = CR2(0);
+
+        cr2.set_clock(true, Clock::HSI48);
+        assert_eq!(cr2.0, 0b1 << 16);
+
+        cr2.set_clock(true, Clock::HSI14);
+        assert_eq!(cr2.0, 0b1 | 0b1 << 16);
+    }
+
+    #[test]
+    fn test_cr2_set_clock_off_multiple_clocks_doesnt_change_other_clocks() {
+        // HSI14 and HSI48 start on
+        let mut cr2 = CR2(0b1 | 0b1 << 16);
+
+        cr2.set_clock(false, Clock::HSI14);
+        assert_eq!(cr2.0, 0b1 << 16);
+
+        cr2.set_clock(false, Clock::HSI48);
+        assert_eq!(cr2.0, 0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cr2_set_clock_unhandled_clock_panics() {
+        let mut cr2 = CR2(0);
+
+        cr2.set_clock(true, Clock::PLL);
+    }
+
+    #[test]
+    fn test_cr2_clock_is_on_all_clocks_off() {
+        let cr2 = CR2(0);
+
+        assert_eq!(cr2.clock_is_on(Clock::HSI48), false);
+        assert_eq!(cr2.clock_is_on(Clock::HSI14), false);
+    }
+
+    #[test]
+    fn test_cr2_clock_is_on_all_clocks_on() {
+        // HSI14 and HSI48 start on
+        let cr2 = CR2(0b1 | 0b1 << 16);
+
+        assert_eq!(cr2.clock_is_on(Clock::HSI48), true);
+        assert_eq!(cr2.clock_is_on(Clock::HSI14), true);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cr2_clock_is_on_unhandled_clock_panics() {
+        let cr2 = CR2(0);
+
+        cr2.clock_is_on(Clock::PLL);
+    }
+
+    #[test]
+    fn test_cr2_clock_is_ready_all_clocks_not_ready() {
+        let cr2 = CR2(0);
+
+        assert_eq!(cr2.clock_is_ready(Clock::HSI48), false);
+        assert_eq!(cr2.clock_is_ready(Clock::HSI14), false);
+    }
+
+    #[test]
+    fn test_cr2_clock_is_ready_all_clocks_ready() {
+        // HSI14 and HSI48 start ready
+        let cr2 = CR2(0b1 << 1 | 0b1 << 17);
+
+        assert_eq!(cr2.clock_is_ready(Clock::HSI48), true);
+        assert_eq!(cr2.clock_is_ready(Clock::HSI14), true);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cr2_clock_is_ready_unhandled_clock_panics() {
+        let cr2 = CR2(0);
+
+        cr2.clock_is_ready(Clock::PLL);
     }
 }
