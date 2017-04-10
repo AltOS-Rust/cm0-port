@@ -19,7 +19,7 @@ use super::super::Field;
 use super::defs::*;
 
 /// Defines the behavior of the GPIO pin when not asserted.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Pull {
     /// No behavior.
     Neither,
@@ -72,5 +72,52 @@ impl PUPDR {
         let mask = (self.0 & (PUPD_MASK << (port * 2))) >> (port * 2);
 
         Pull::from_mask(mask)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_pupdr_set_pull() {
+        let mut pupdr = PUPDR(0);
+
+        pupdr.set_pull(Pull::Up, 4);
+        assert_eq!(pupdr.0, 0b01 << 8);
+    }
+
+    #[test]
+    fn test_pupdr_set_pull_multiple_ports_doesnt_clear_settings() {
+        let mut pupdr = PUPDR(0);
+
+        pupdr.set_pull(Pull::Down, 5);
+        assert_eq!(pupdr.0, 0b10 << 10);
+
+        pupdr.set_pull(Pull::Up, 6);
+        assert_eq!(pupdr.0, 0b10 << 10 | 0b01 << 12);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_pupdr_set_pull_port_greater_than_15_panics() {
+        let mut pupdr = PUPDR(0);
+
+        pupdr.set_pull(Pull::Up, 16);
+    }
+
+    #[test]
+    fn test_pupdr_get_pull() {
+        let pupdr = PUPDR(0b10 << 6);
+
+        assert_eq!(pupdr.get_pull(3), Pull::Down);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_pupdr_get_pull_port_greater_than_15_panics() {
+        let pupdr = PUPDR(0);
+
+        pupdr.get_pull(16);
     }
 }

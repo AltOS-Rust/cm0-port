@@ -23,7 +23,7 @@ use super::defs::*;
 /// Refer to the device data sheet for the frequency specifications
 /// and the power supply and load conditions for each speed.
 #[allow(missing_docs)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Speed {
     Low,
     Medium,
@@ -73,5 +73,52 @@ impl OSPEEDR {
         let mask = (self.0 & (SPEED_MASK << (port * 2))) >> (port * 2);
 
         Speed::from_mask(mask)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ospeedr_set_speed() {
+        let mut ospeedr = OSPEEDR(0);
+
+        ospeedr.set_speed(Speed::High, 4);
+        assert_eq!(ospeedr.0, 0b11 << 8);
+    }
+
+    #[test]
+    fn test_ospeedr_set_multiple_ports_doesnt_clear_settings() {
+        let mut ospeedr = OSPEEDR(0);
+
+        ospeedr.set_speed(Speed::High, 8);
+        assert_eq!(ospeedr.0, 0b11 << 16);
+
+        ospeedr.set_speed(Speed::Medium, 12);
+        assert_eq!(ospeedr.0, 0b11 << 16 | 0b01 << 24);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_ospeedr_set_speed_port_greater_than_15_panics() {
+        let mut ospeedr = OSPEEDR(0);
+
+        ospeedr.set_speed(Speed::High, 16);
+    }
+
+    #[test]
+    fn test_ospeedr_get_speed() {
+        let ospeedr = OSPEEDR(0b11 << 18);
+
+        assert_eq!(ospeedr.get_speed(9), Speed::High);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_ospeedr_get_speed_port_greater_than_15_panics() {
+        let ospeedr = OSPEEDR(0);
+
+        ospeedr.get_speed(16);
     }
 }

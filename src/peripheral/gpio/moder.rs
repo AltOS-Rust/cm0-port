@@ -19,7 +19,7 @@ use super::super::Field;
 use super::defs::*;
 
 /// Defines available modes for the GPIO pins.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Mode {
     /// Pin configured for input data.
     Input,
@@ -78,5 +78,52 @@ impl MODER {
         let mask = (self.0 & (MODE_MASK << (port * 2))) >> (port * 2);
 
         Mode::from_mask(mask)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_moder_set_mode() {
+        let mut moder = MODER(0);
+
+        moder.set_mode(Mode::Analog, 6);
+        assert_eq!(moder.0, 0b11 << 12);
+    }
+
+    #[test]
+    fn test_moder_set_multiple_ports_doesnt_clear_setting() {
+        let mut moder = MODER(0);
+
+        moder.set_mode(Mode::Analog, 8);
+        assert_eq!(moder.0, 0b11 << 16);
+
+        moder.set_mode(Mode::Output, 4);
+        assert_eq!(moder.0, 0b11 << 16 | 0b01 << 8);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_moder_set_mode_port_greater_than_15_panics() {
+        let mut moder = MODER(0);
+
+        moder.set_mode(Mode::Analog, 16);
+    }
+
+    #[test]
+    fn test_moder_get_mode() {
+        let moder = MODER(0b11 << 14);
+
+        assert_eq!(moder.get_mode(7), Mode::Analog);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_moder_get_mode_port_greater_than_15_panics() {
+        let moder = MODER(0);
+
+        moder.get_mode(16);
     }
 }
