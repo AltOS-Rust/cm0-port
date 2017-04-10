@@ -59,7 +59,7 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn test_rvr_set_reload_value_greater_than_0xFFFFFF_panics() {
+    fn test_rvr_set_reload_value_greater_than_0xffffff_panics() {
         let mut rvr = RVR(0);
 
         rvr.set_reload_value(0xFFFFFF + 1);

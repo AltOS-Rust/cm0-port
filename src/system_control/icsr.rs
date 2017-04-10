@@ -29,3 +29,24 @@ impl ICSR {
         self.0 |= ICSR_PENDSVCLR;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_icsr_set_pend_sv() {
+        let mut icsr = ICSR(0);
+
+        icsr.set_pend_sv();
+        assert_eq!(icsr.0, 0b1 << 28);
+    }
+
+    #[test]
+    fn test_icsr_clear_pend_sv() {
+        let mut icsr = ICSR(0);
+
+        icsr.clear_pend_sv();
+        assert_eq!(icsr.0, 0b1 << 27);
+    }
+}
