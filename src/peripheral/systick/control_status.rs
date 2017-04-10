@@ -17,8 +17,11 @@
 
 use super::defs::*;
 
+/// The clock source for the SysTick device
 pub enum ClockSource {
+    /// Use a reference clock
     Reference,
+    /// Use the main system clock
     Processor,
 }
 
