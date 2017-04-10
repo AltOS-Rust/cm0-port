@@ -49,7 +49,7 @@ mod tests {
         // the register.
         //
         // The implementation shouldn't matter, but if it ever does change this test could fail if
-        // the value written to the register happens to be the same as what it is initialzied to.
+        // the value written to the register happens to be the same as what it is initialized to.
         // For this reason we initialize the register to the negation of the constant used to clear
         // it, this should hopefully make this test a bit more sturdy.
         let mut cvr = CVR(!CLEAR_VALUE);

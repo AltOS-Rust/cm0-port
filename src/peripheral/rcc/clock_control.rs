@@ -213,7 +213,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_cr_set_clock_on() {
+    fn test_cr_set_clock_pll_on() {
         let mut cr = CR(0);
 
         cr.set_clock(true, Clock::PLL);
@@ -221,7 +221,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cr_set_clock_off() {
+    fn test_cr_set_clock_pll_off() {
         // PLL starts on
         let mut cr = CR(0b1 << 24);
 
@@ -315,7 +315,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cr2_set_clock_on() {
+    fn test_cr2_set_hsi48_clock_on() {
         let mut cr2 = CR2(0);
 
         cr2.set_clock(true, Clock::HSI48);
@@ -323,7 +323,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cr2_set_clock_off() {
+    fn test_cr2_set_hsi48_clock_off() {
         // HSI48 starts on
         let mut cr2 = CR2(0b1 << 16);
 
