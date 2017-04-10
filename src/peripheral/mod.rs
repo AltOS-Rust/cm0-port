@@ -23,8 +23,6 @@ pub mod systick;
 #[cfg(feature="serial")]
 pub mod usart;
 
-use volatile::Volatile;
-
 #[macro_export]
 macro_rules! pad_field {
     ($name:ident[$N:expr]) => {
