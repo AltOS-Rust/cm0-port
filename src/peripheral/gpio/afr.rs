@@ -120,7 +120,6 @@ impl AFRH {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use test;
 
     #[test]
     fn test_afrl_set_function() {

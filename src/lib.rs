@@ -41,9 +41,6 @@ pub extern crate arm;
 extern crate volatile_ptr as volatile;
 //pub extern crate compiler_builtins; // See above comment
 
-#[cfg(test)]
-mod test;
-
 #[macro_use]
 pub mod peripheral;
 pub mod io;
