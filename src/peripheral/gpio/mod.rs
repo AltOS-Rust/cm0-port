@@ -213,11 +213,19 @@ impl RawGPIO {
     }
 
     /// Set behavior of GPIO pin when it is not asserted.
+    ///
+    /// # Panics
+    ///
+    /// Port must be a value between [0..15] or the kernel will panic.
     fn set_pull(&mut self, pull: Pull, port: u8) {
         self.pupdr.set_pull(pull, port);
     }
 
     /// Get currently defined behavior of GPIO pin when not asserted.
+    ///
+    /// # Panics
+    ///
+    /// Port must be a value between [0..15] or the kernel will panic.
     fn get_pull(&self, port: u8) -> Pull {
         self.pupdr.get_pull(port)
     }

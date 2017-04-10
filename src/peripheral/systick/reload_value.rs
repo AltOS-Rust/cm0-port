@@ -37,3 +37,31 @@ impl RVR {
         self.0 = value;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_rvr_get_reload_value() {
+        let rvr = RVR(0xFFFF);
+
+        assert_eq!(rvr.get_reload_value(), 0xFFFF);
+    }
+
+    #[test]
+    fn test_rvr_set_reload_value() {
+        let mut rvr = RVR(0);
+
+        rvr.set_reload_value(0xFF);
+        assert_eq!(rvr.0, 0xFF);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_rvr_set_reload_value_greater_than_0xffffff_panics() {
+        let mut rvr = RVR(0);
+
+        rvr.set_reload_value(0xFFFFFF + 1);
+    }
+}

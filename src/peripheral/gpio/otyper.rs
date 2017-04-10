@@ -19,7 +19,7 @@ use super::super::Field;
 use super::defs::*;
 
 /// Available GPIO pin types.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Type {
     /// Actively drives the output to High.
     PushPull,
@@ -69,5 +69,52 @@ impl OTYPER {
         let mask = (self.0 & (0b1 << port)) >> port;
 
         Type::from_mask(mask)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_otyper_set_type() {
+        let mut otyper = OTYPER(0);
+
+        otyper.set_type(Type::OpenDrain, 4);
+        assert_eq!(otyper.0, 0b1 << 4);
+    }
+
+    #[test]
+    fn test_otyper_set_type_multiple_ports_doesnt_clear_settings() {
+        let mut otyper = OTYPER(0);
+
+        otyper.set_type(Type::OpenDrain, 5);
+        assert_eq!(otyper.0, 0b1 << 5);
+
+        otyper.set_type(Type::OpenDrain, 7);
+        assert_eq!(otyper.0, 0b1 << 5 | 0b1 << 7);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_otyper_set_type_port_greater_than_15_panics() {
+        let mut otyper = OTYPER(0);
+
+        otyper.set_type(Type::OpenDrain, 16);
+    }
+
+    #[test]
+    fn test_otyper_get_type() {
+        let otyper = OTYPER(0b1 << 9);
+
+        assert_eq!(otyper.get_type(9), Type::OpenDrain);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_otyper_get_type_port_greater_than_15_panics() {
+        let otyper = OTYPER(0);
+
+        otyper.get_type(16);
     }
 }

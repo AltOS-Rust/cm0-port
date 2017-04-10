@@ -17,8 +17,11 @@
 
 use super::defs::*;
 
+/// The clock source for the SysTick device
 pub enum ClockSource {
+    /// Use a reference clock
     Reference,
+    /// Use the main system clock
     Processor,
 }
 
@@ -55,5 +58,65 @@ impl CSR {
     /// Returns true if the counter has reached zero since the last time it was checked.
     pub fn did_underflow(&self) -> bool {
         (self.0 & COUNTFLAG) != 0
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_csr_set_enable_on() {
+        let mut csr = CSR(0);
+
+        csr.set_enable(true);
+        assert_eq!(csr.0, 0b1);
+    }
+
+    #[test]
+    fn test_csr_set_enable_off() {
+        let mut csr = CSR(0b1);
+
+        csr.set_enable(false);
+        assert_eq!(csr.0, 0);
+    }
+
+    #[test]
+    fn test_csr_set_interrupt_on() {
+        let mut csr = CSR(0);
+
+        csr.set_interrupt(true);
+        assert_eq!(csr.0, 0b1 << 1);
+    }
+
+    #[test]
+    fn test_csr_set_interrupt_off() {
+        let mut csr = CSR(0);
+
+        csr.set_interrupt(false);
+        assert_eq!(csr.0, 0);
+    }
+
+    #[test]
+    fn test_csr_set_source() {
+        let mut csr = CSR(0);
+
+        csr.set_source(ClockSource::Processor);
+        assert_eq!(csr.0, 0b1 << 2);
+    }
+
+    #[test]
+    fn test_csr_did_underflow_false_if_underflow_bit_not_set() {
+        let csr = CSR(0);
+
+        assert_eq!(csr.did_underflow(), false);
+    }
+
+    #[test]
+    fn test_csr_did_underflow_true_if_underflow_bit_set() {
+        // underflow bit set at start
+        let csr = CSR(0b1 << 16);
+
+        assert_eq!(csr.did_underflow(), true);
     }
 }

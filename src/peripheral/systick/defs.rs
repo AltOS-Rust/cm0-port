@@ -31,3 +31,4 @@ pub const RELOAD: u32 = 0xFFFFFF;
 // Current Value Register
 pub const CVR_OFFSET: u32 = 0x08;
 pub const CURRENT: u32 = 0xFFFFFF;
+pub const CLEAR_VALUE: u32 = 0xFFFFFFFF;

@@ -40,7 +40,6 @@ pub fn rcc() -> RCC {
     RCC::rcc()
 }
 
-/// Reset and Clock Controller
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
 #[doc(hidden)]
@@ -61,6 +60,7 @@ pub struct RawRCC {
     cr2: CR2,
 }
 
+/// Reset and Clock Controller
 #[derive(Copy, Clone, Debug)]
 pub struct RCC(Volatile<RawRCC>);
 

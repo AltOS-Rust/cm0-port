@@ -36,7 +36,6 @@ pub fn systick() -> SysTick {
     SysTick::systick()
 }
 
-/// Control system tick behavior.
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
 #[doc(hidden)]
@@ -47,6 +46,7 @@ pub struct RawSysTick {
     calib: u32,
 }
 
+/// Control system tick behavior.
 #[derive(Copy, Clone, Debug)]
 pub struct SysTick(Volatile<RawSysTick>);
 

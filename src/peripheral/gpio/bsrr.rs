@@ -41,7 +41,6 @@ impl BSRR {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use test;
 
     #[test]
     fn test_bsrr_set_8_yields_binary_256() {

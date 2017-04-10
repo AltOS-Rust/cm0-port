@@ -17,18 +17,18 @@
 
 pub const RCC_ADDR: *const u32 = 0x4002_1000 as *const _;
 
-pub const CR_OFFSET: u32 = 0x00;
-// TODO: Preface these with CR
 pub const HSI_VALUE: u32 = 8_000_000;
 pub const HSE_VALUE: u32 = 8_000_000;
 pub const HSI48_VALUE: u32 = 48_000_000;
 
-pub const HSION: u32 = 0b1 << 0;
-pub const HSIRDY: u32 = 0b1 << 1;
-pub const HSEON: u32 = 0b1 << 16;
-pub const HSERDY: u32 = 0b1 << 17;
-pub const PLLON: u32 = 0b1 << 24;
-pub const PLLRDY: u32 = 0b1 << 25;
+pub const CR_OFFSET: u32 = 0x00;
+
+pub const CR_HSION: u32 = 0b1 << 0;
+pub const CR_HSIRDY: u32 = 0b1 << 1;
+pub const CR_HSEON: u32 = 0b1 << 16;
+pub const CR_HSERDY: u32 = 0b1 << 17;
+pub const CR_PLLON: u32 = 0b1 << 24;
+pub const CR_PLLRDY: u32 = 0b1 << 25;
 
 // CFGR Bit Offsets
 pub const CFGR_OFFSET: u32 = 0x04;

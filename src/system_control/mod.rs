@@ -31,7 +31,6 @@ pub fn scb() -> SCB {
     SCB::scb()
 }
 
-/// System Control Block
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
 #[doc(hidden)]
@@ -47,6 +46,7 @@ pub struct RawSCB {
     shpr3: u32,
 }
 
+/// System Control Block
 #[derive(Copy, Clone, Debug)]
 pub struct SCB(Volatile<RawSCB>);
 
