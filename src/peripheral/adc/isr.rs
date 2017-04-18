@@ -15,27 +15,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use super::super::Register;
 use super::defs::*;
 
 #[derive(Copy, Clone, Debug)]
-pub struct ISR {
-    base_addr: *const u32,
-}
-
-impl Register for ISR {
-    fn new(base_addr: *const u32) -> Self {
-        ISR { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        ISR_OFFSET
-    }
-}
+pub struct ISR(u32);
 
 impl ISR {
     /*
@@ -45,9 +28,7 @@ impl ISR {
     1: Overrun has occurred
     */
     pub fn overrun_occurred(&self) -> bool {
-        unsafe {
-            *self.addr() & ISR_OVR != 0
-        }
+        self.0 & ISR_OVR != 0
     }
 
     /*
@@ -58,9 +39,7 @@ impl ISR {
     1: Channel conversion complete
     */
     pub fn get_eoc(&self) -> bool {
-        unsafe {
-            *self.addr() & ISR_EOC != 0
-        }
+        self.0 & ISR_EOC != 0
     }
 
     /*
@@ -70,9 +49,7 @@ impl ISR {
     1: End of sampling phase reached
     */
     pub fn get_eosmp(&self) -> bool {
-        unsafe {
-            *self.addr() & ISR_EOSMP != 0
-        }
+        self.0 & ISR_EOSMP != 0
     }
 
     /*
@@ -82,9 +59,7 @@ impl ISR {
     1: ADC is ready to start conversion
     */
     pub fn adc_ready(&self) -> bool {
-        unsafe {
-            *self.addr() & ISR_ADRDY != 0
-        }
+        self.0 & ISR_ADRDY != 0
     }
 
     /*
@@ -95,9 +70,7 @@ impl ISR {
     1: Conversion sequence complete
     */
     pub fn get_eoseq(&self) -> bool {
-        unsafe {
-            *self.addr() & ISR_EOSEQ != 0
-        }
+        self.0 & ISR_EOSEQ != 0
     }
 }
 

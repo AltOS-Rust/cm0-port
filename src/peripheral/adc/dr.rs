@@ -15,27 +15,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use super::super::Register;
 use super::defs::*;
 
 #[derive(Copy, Clone, Debug)]
-pub struct DR {
-    base_addr: *const u32,
-}
-
-impl Register for DR {
-    fn new(base_addr: *const u32) -> Self {
-        DR { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        DR_OFFSET
-    }
-}
+pub struct DR(u32);
 
 impl DR {
     /*
@@ -46,15 +29,11 @@ impl DR {
     */
     // Make this u16?
     pub fn get_converted_data(&self) -> u16 {
-        unsafe {
-            self.addr().load() as u16
-        }
+        self.0 as u16
     }
 
     // Calibration factor is put in data register [6:0] at end of calibration
     pub fn get_calibration_factor(&self) -> u16 {
-        unsafe {
-            (self.addr().load() & 0x7F) as u16
-        }
+        (self.0 & 0x7F) as u16
     }
 }

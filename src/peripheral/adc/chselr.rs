@@ -15,11 +15,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use super::super::{Field, Register};
+use super::super::Field;
 use super::defs::*;
 
 // TODO: Comments
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum Channel {
     Zero,
     One,
@@ -97,35 +97,15 @@ impl Channel {
 
 
 #[derive(Copy, Clone, Debug)]
-pub struct CHSELR {
-    base_addr: *const u32,
-}
-
-impl Register for CHSELR {
-    fn new( base_addr: *const u32 ) -> Self {
-        CHSELR { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        CHSELR_OFFSET
-    }
-}
+pub struct CHSELR(u32);
 
 impl CHSELR {
     pub fn select_channel(&mut self, channel: Channel) {
-        unsafe {
-            *self.addr() |= channel.mask();
-        }
+        self.0 |= channel.mask();
     }
 
     pub fn unselect_channel(&mut self, channel: Channel) {
-        unsafe {
-            *self.addr() &= !channel.mask();
-        }
+        self.0 &= !channel.mask();
     }
 }
 

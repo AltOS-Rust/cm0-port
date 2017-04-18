@@ -15,27 +15,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use super::super::Register;
 use super::defs::*;
 
 #[derive(Copy, Clone, Debug)]
-pub struct CR {
-    base_addr: *const u32,
-}
-
-impl Register for CR {
-    fn new(base_addr: *const u32) -> Self {
-        CR { base_addr: base_addr }
-    }
-
-    fn base_addr(&self) -> *const u32 {
-        self.base_addr
-    }
-
-    fn mem_offset(&self) -> u32 {
-        CR_OFFSET
-    }
-}
+pub struct CR(u32);
 
 impl CR {
     /*
@@ -46,17 +29,13 @@ impl CR {
     Note: Software may set ADCAL only when ADC is disabled (ADCAL=0, ADSTART=0, ADSTP=0, ADDIS=0, ADEN=0)
     */
     pub fn start_adc_calibration(&mut self) {
-        unsafe {
-            let mut reg = self.addr();
-            *reg |= CR_ADCAL;
-        }
+        self.0 |= CR_ADCAL;
     }
 
     pub fn is_adc_calibrating(&mut self) -> bool {
-        unsafe {
-            *self.addr() & CR_ADCAL != 0
-        }
+        self.0 & CR_ADCAL != 0
     }
+
     /*
     ADSTP: ADC stop conversion command
     Set by software to stop and discard an ongoing conversion.
@@ -66,17 +45,13 @@ impl CR {
     Note: Software allowed to set ADSTP only when ADSTART=1 and ADDIS=0
     */
     pub fn stop_adc_conversion(&mut self) {
-        unsafe {
-            let mut reg = self.addr();
-            *reg |= CR_ADSTP;
-        }
+        self.0 |= CR_ADSTP;
     }
 
     pub fn is_adc_stopping_conversion(&mut self) -> bool {
-        unsafe {
-            *self.addr() & CR_ADSTP != 0
-        }
+        self.0 & CR_ADSTP != 0
     }
+
     /*
     ADSTART: ADC start conversion command
     Set by software to start ADC conversion. Depends on EXTEN[1:0] configuration bits.
@@ -86,17 +61,13 @@ impl CR {
     Note: Software allowed to set ADSTART only when ADEN=1 and ADDIS=0
     */
     pub fn start_adc_conversion(&mut self) {
-        unsafe {
-            let mut reg = self.addr();
-            *reg |= CR_ADSTART;
-        }
+        self.0 |= CR_ADSTART;
     }
 
     pub fn is_adc_conversion_started(&mut self) -> bool {
-        unsafe {
-            *self.addr() & CR_ADSTART != 0
-        }
+        self.0 & CR_ADSTART != 0
     }
+
     /*
     ADDIS: ADC disable command
     Set by software to disabled the ADC and put it in power-down state.
@@ -106,10 +77,7 @@ impl CR {
     Note: Software allowed to set ADDIS only when ADEN=1 and ADSTART=0
     */
     pub fn disable_adc(&mut self) {
-        unsafe {
-            let mut reg = self.addr();
-            *reg |= CR_ADDIS;
-        }
+        self.0 |= CR_ADDIS;
     }
 
     /*
@@ -121,9 +89,6 @@ impl CR {
     Note: Software allowed to set ADEN only when all bits of ADC_CR registers are 0
     */
     pub fn enable_adc(&mut self) {
-        unsafe {
-            let mut reg = self.addr();
-            *reg |= CR_ADEN;
-        }
+        self.0 |= CR_ADEN;
     }
 }

@@ -24,10 +24,10 @@ mod cr;
 mod dr;
 mod chselr;
 
-use super::{Control, Register};
+use core::ops::{Deref, DerefMut};
 use volatile::Volatile;
-use self::cr::CR;
 use self::isr::ISR;
+use self::cr::CR;
 use self::ier::IER;
 use self::dr::DR;
 use self::chselr::CHSELR;
@@ -35,48 +35,66 @@ use self::defs::*;
 use peripheral::{rcc, gpio};
 // use interrupt;
 
-// #[derive(Copy, Clone, Debug)]
-pub struct Adc {
-    // Memory address of the ADC
-    mem_addr: *const u32,
-    // Control register
-    cr: CR,
+pad_field!(Pad1[0x8]);
+pad_field!(Pad2[0x14]);
+pad_field!(Pad3[0x2c4]);
+
+#[derive(Copy, Clone, Debug)]
+#[repr(C)]
+#[doc(hidden)]
+pub struct RawADC {
     // Interrupt and status register
     isr: ISR,
     // Interrupt enable register
     ier: IER,
+    // Control register
+    cr: CR,
+    cfgr1: u32,
+    cfgr2: u32,
+    smpr: u32,
+    _pad1: Pad1,
+    tr: u32,
+    chselr: CHSELR,
+    chselr: u32,
+    _pad2: Pad2,
     // Data register
     dr: DR,
+    _pad3: Pad3,
+    ccr: u32,
 
     // Collection of configuration registers?
     // cfgr1: CFGR1,
     // cfgr2: CFGR2,
     // smpr: SMPR,
-    chselr: CHSELR,
-
-    // tr: TR,
-    // ccr: CCR,
 }
 
-impl Control for Adc {
-    unsafe fn mem_addr(&self) -> Volatile<u32> {
-        Volatile::new(self.mem_addr as *const u32)
-    }
-}
+#[derive(Copy, Clone, Debug)]
+pub struct ADC(Volatile<RawADC>);
 
 impl Adc {
     // Creates a new Adc object to allow for configuration of the ADC peripheral.
-    pub fn new() -> Self {
-        Adc {
-            mem_addr: ADC_ADDR,
-            cr: CR::new(ADC_ADDR),
-            isr: ISR::new(ADC_ADDR),
-            ier: IER::new(ADC_ADDR),
-            dr: DR::new(ADC_ADDR),
-            chselr: CHSELR::new(ADC_ADDR),
+    fn new() -> Self {
+        unsafe {
+            ADC(Volatile::new(ADC_ADDR as *const _))
         }
     }
+}
 
+impl Deref for ADC {
+    type Target = RawADC;
+
+    fn deref(&self) -> &Self::Target {
+        &*(self.0)
+    }
+}
+
+impl DerefMut for ADC {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut *(self.0)
+    }
+}
+
+impl RawADC {
     pub fn get_calibration(&mut self) -> u16 {
         self.cr.start_adc_calibration();
         // Wait until calibration is finished
@@ -133,7 +151,7 @@ pub fn init() {
     pa0.set_type(gpio::Type::PushPull); // Should this be OpenDrain or PushPull?
     pa0.set_pull(gpio::Pull::Neither);
 
-    let mut adc1 = Adc::new();
+    let mut adc1 = ADC::new();
 
     // Functions we need...
     // adc1.set_resolution();
