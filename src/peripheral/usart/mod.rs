@@ -49,7 +49,7 @@ use self::defs::*;
 use peripheral::{rcc, gpio};
 use interrupt;
 
-pub use self::control::{WordLength, Mode, Parity, StopLength, HardwareFlowControl};
+pub use self::control::{WordLength, Mode, Parity, StopLength, HardwareFlowControl, DMAMode};
 pub use self::baudr::BaudRate;
 
 /// Defines the wake/sleep channel for the TX buffer when full.
@@ -199,6 +199,11 @@ impl RawUsart {
         self.cr2.set_stop_bits(length);
     }
 
+    /// Set the Usart DMA mode for transmit and receive configurations.
+    pub fn set_dma_mode(&mut self, dma_mode: DMAMode) {
+        self.cr3.set_dma_mode(dma_mode);
+    }
+
     /// Set hardware flow control mode.
     ///
     /// # Note
@@ -296,6 +301,7 @@ pub fn init() {
     usart2.disable_usart();
 
     usart2.set_word_length(WordLength::Eight);
+    usart2.set_dma_mode(DMAMode::All);
     usart2.set_mode(Mode::All);
     usart2.set_parity(Parity::None);
     usart2.set_hardware_flow_control(HardwareFlowControl::None);
