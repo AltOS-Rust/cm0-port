@@ -316,32 +316,6 @@ impl CR3 {
         self.0 |= mask;
     }
 
-    /* Bit 6 DMAR: DMA enable receiver
-     *   This bit is set/reset by software
-     *      1: DMA mode is enabled for reception
-     *      0: DMA mode is disabled for reception
-     */
-    pub fn set_dma_receiver(&mut self, enable: bool) {
-        self.0 &= !(CR3_DMAR);
-
-        if enable {
-            self.0 |= CR3_DMAR;
-        }
-    }
-
-    /* Bit 7 DMAT: DMA enable transmitter
-     *  This bit is set/reset by software
-     *      1: DMA mode is enabled for transmission
-     *      0: DMA mode is disabled for transmission
-     */
-    pub fn set_dma_transmitter(&mut self, enable: bool) {
-        self.0 &= !(CR3_DMAT);
-
-        if enable {
-            self.0 |= CR3_DMAT;
-        }
-    }
-
     /* Uses bit 8 and 9 in CR3 to set the hardware flow control to None, Rts,
      * Cts, All.
      *      Bit 8 RTSE: RTS enable
@@ -526,6 +500,23 @@ mod tests {
 
         cr2.set_stop_bits(StopLength::One);
         assert_eq!(cr2.0, 0b0);
+    }
+
+    #[test]
+    fn test_cr3_set_dma_mode() {
+        let mut cr3 = CR3(0);
+
+        cr3.set_dma_mode(DMAMode::Receive);
+        assert_eq!(cr3.0, 0b1 << 6);
+
+        cr3.set_dma_mode(DMAMode::Transmit);
+        assert_eq!(cr3.0, 0b1 << 7);
+
+        cr3.set_dma_mode(DMAMode::All);
+        assert_eq!(cr3.0, 0b11 << 6);
+
+        cr3.set_dma_mode(DMAMode::None);
+        assert_eq!(cr3.0, 0)
     }
 
     #[test]
