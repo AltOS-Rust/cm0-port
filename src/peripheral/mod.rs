@@ -22,6 +22,7 @@ pub mod gpio;
 pub mod systick;
 #[cfg(feature="serial")]
 pub mod usart;
+pub mod dma;
 
 #[macro_export]
 macro_rules! pad_field {

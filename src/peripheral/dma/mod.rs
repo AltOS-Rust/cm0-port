@@ -15,13 +15,18 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+mod ccr;
+mod cndtr;
+mod cpar;
+mod cmar;
+mod ifcr;
+
 use core::ops::{Deref, DerefMut};
 use volatile::Volatile;
 use self::ccr::CCR;
 use self::cndtr::CNDTR;
 use self::cpar::CPAR;
 use self::defs::*;
-
 
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
