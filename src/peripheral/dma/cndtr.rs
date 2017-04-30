@@ -20,8 +20,9 @@ pub struct CNDTR(u32);
 
 impl CNDTR {
     /* Bits 31:16 Reserved, must be kept at reset value.
-     * Bits 15:0 NDT[15:0]:
-     *  Number of data to transfer Number of data to be transferred (0 up to 65535).
+     * Bits 15:0 NDT[15:0]: Number of data to transfer
+     *
+     * Number of data to be transferred (0 up to 65535).
      *
      * This register can only be written when the channel is disabled.
      *   Once the channel is enabled, this register is read-only, indicating the remaining
@@ -34,7 +35,26 @@ impl CNDTR {
      * If this register is zero, no transaction can be served whether the channel is
      *   enabled or not.
      */
-    pub fn set_ndt(&mut self, num_bits: u16) {
-        self.0 = num_bits as u32;
+    pub fn set_ndt(&mut self, num_data: u16) {
+        self.0 = num_data as u32;
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_cndtr_set_ndt_stores_value_correctly() {
+        let mut cndtr = CNDTR(0);
+        assert_eq!(cndtr.0, 0b0);
+
+        cndtr.set_ndt(65535);
+        assert_eq!(cndtr.0, 65535);
+
+        cndtr.set_ndt(5);
+        assert_eq!(cndtr.0, 5);
+    }
+
+    // TODO: Tests for out of range values?
 }

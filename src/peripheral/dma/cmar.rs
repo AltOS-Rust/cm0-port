@@ -30,3 +30,20 @@ impl CMAR {
         self.0 = mem_addr;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_cmar_set_ma_correctly_stores_address() {
+        let mut cmar = CMAR(0);
+        assert_eq!(cmar.0, 0b0);
+
+        cmar.set_ma(0x4001_3800);
+        assert_eq!(cmar.0, 0x4001_3800);
+
+        cmar.set_ma(0x4000_4400);
+        assert_eq!(cmar.0, 0x4000_4400);
+    }
+}

@@ -32,3 +32,19 @@ impl CPAR {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_cpar_set_pa_correctly_stores_address() {
+        let mut cpar = CPAR(0);
+        assert_eq!(cpar.0, 0b0);
+
+        cpar.set_pa(0x4001_3800);
+        assert_eq!(cpar.0, 0x4001_3800);
+
+        cpar.set_pa(0x4000_4400);
+        assert_eq!(cpar.0, 0x4000_4400);
+    }
+}
