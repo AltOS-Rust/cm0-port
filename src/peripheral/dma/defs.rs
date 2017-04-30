@@ -75,21 +75,21 @@ pub const DMAx_CTEIF_5: u32 = 0b1 << 19;
 // CCRx Bit definitions (x = 1-5, stm32F04 has 5 DMA channels)
 // ------------------------------------
 // NOTE: CCRx offset is calculated by: 0x08 + 0d20 * (channel number - 1)
-pub const CCRx_EN:      u32 = 0b1;
-pub const CCRx_TCIE:    u32 = 0b1  << 1;
-pub const CCRx_HTIE:    u32 = 0b1  << 2;
-pub const CCRx_TEIE:    u32 = 0b1  << 3;
-pub const CCRx_DIR:     u32 = 0b1  << 4;
-pub const CCRx_CIRC:    u32 = 0b1  << 5;
-pub const CCRx_PINC:    u32 = 0b1  << 6;
-pub const CCRx_MINC:    u32 = 0b1  << 7;
-pub const CCRx_PSIZE_8: u32 = 0b1  << 8;
-pub const CCRx_PSIZE_9: u32 = 0b1  << 9;
-pub const CCRx_MSIZE0:  u32 = 0b1  << 10;
-pub const CCRx_MSIZE1:  u32 = 0b1  << 11;
-pub const CCRx_PL0:     u32 = 0b1  << 12;
-pub const CCRx_PL1:     u32 = 0b1  << 13;
-pub const CCRx_MEM2MEM: u32 = 0b1  << 14;
+pub const CCR_EN:      u32 = 0b1;
+pub const CCR_TCIE:    u32 = 0b1  << 1;
+pub const CCR_HTIE:    u32 = 0b1  << 2;
+pub const CCR_TEIE:    u32 = 0b1  << 3;
+pub const CCR_DIR:     u32 = 0b1  << 4;
+pub const CCR_CIRC:    u32 = 0b1  << 5;
+pub const CCR_PINC:    u32 = 0b1  << 6;
+pub const CCR_MINC:    u32 = 0b1  << 7;
+pub const CCR_PSIZE0: u32 = 0b1  << 8;
+pub const CCR_PSIZE1: u32 = 0b1  << 9;
+pub const CCR_MSIZE0:  u32 = 0b1  << 10;
+pub const CCR_MSIZE1:  u32 = 0b1  << 11;
+pub const CCR_PL0:     u32 = 0b1  << 12;
+pub const CCR_PL1:     u32 = 0b1  << 13;
+pub const CCR_MEM2MEM: u32 = 0b1  << 14;
 // Bits 15 - 31 are reserved.
 
 // ------------------------------------
