@@ -17,36 +17,30 @@
 
 use core::ops::{Deref, DerefMut};
 use volatile::Volatile;
+use self::ccr::CCR;
+use self::cndtr::CNDTR;
+use self::cpar::CPAR;
+use self::defs::*;
+
+
+#[derive(Copy, Clone, Debug)]
+#[repr(C)]
+#[doc(hidden)]
+struct DMAChannel {
+    ccr: CCR,
+    cndtr: CNDTR,
+    cpar: CPAR,
+    cmar: CMAR,
+    _res: u32,
+}
 
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
 #[doc(hidden)]
 pub struct RawDMA {
-    isr: u32,
-    ifcr: u32,
-    ccr1: u32,
-    cndtr1: u32,
-    cpar1: u32,
-    cmar1: u32,
-    _res1: u32,
-    ccr2: u32,
-    cndtr2: u32,
-    cpar2: u32,
-    cmar2: u32,
-    _res2: u32,
-    ccr3: u32,
-    cndtr3: u32,
-    cpar3: u32,
-    cmar3: u32,
-    ccr4: u32,
-    cndtr4: u32,
-    cpar4: u32,
-    cmar4: u32,
-    _res3: u32,
-    ccr5: u32,
-    cndtr5: u32,
-    cpar5: u32,
-    cmar5: u32,
+    isr: ISR,
+    ifcr: IFCR,
+    channel: [DMAChannel; 5]
 }
 
 #[derive(Copy, Clone, Debug)]
