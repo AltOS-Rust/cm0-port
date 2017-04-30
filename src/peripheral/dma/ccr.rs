@@ -17,10 +17,8 @@
 
 use super::defs::*;
 
-#[derive(Copy, Clone, Debug)]
-pub struct CCR(u32);
-
 /// Defines the possible directions that data can be read from.
+#[derive(Copy, Clone, Debug)]
 pub enum DataDirection {
     /// Data is read from the peripheral.
     FromPeriph,
@@ -29,6 +27,7 @@ pub enum DataDirection {
 }
 
 /// Defines the possible transfer data sizes of the peripheral and memory.
+#[derive(Copy, Clone, Debug)]
 pub enum PeriphAndMemSize {
     /// Eight bits.
     Eight,
@@ -45,6 +44,7 @@ pub enum PeriphAndMemSize {
 /// If two requests have the same software priority, the channel with the lowest
 /// number will get priority versus the channel with the highest number.
 /// For example, channel 2 gets priority over channel 4.
+#[derive(Copy, Clone, Debug)]
 pub enum ChannelPriorityLevel {
     /// Low Priority.
     Low,
@@ -55,6 +55,9 @@ pub enum ChannelPriorityLevel {
     /// Very High Priority.
     VeryHigh,
 }
+
+#[derive(Copy, Clone, Debug)]
+pub struct CCR(u32);
 
 impl CCR {
     /* Bit 0 EN: Channel enable
@@ -112,11 +115,12 @@ impl CCR {
     */
     pub fn set_data_transfer_direction(&mut self, data_dir: DataDirection) {
         let mask = match data_dir {
-            DataDirection::FromPeriph => !(CCR_DIR),
+            DataDirection::FromPeriph => 0,
             DataDirection::FromMem => CCR_DIR,
         };
 
-        self.0 &= mask;
+        self.0 &= !(CCR_DIR);
+        self.0 |= mask;
     }
 
     /* Bit 5 CIRC: Circular mode
@@ -134,7 +138,7 @@ impl CCR {
     /* Bit 6 PINC: Peripheral increment mode
      *  This bit is set and cleared by software.
      *  0: Peripheral increment mode disabled
-     *  1: Peripheral increment mode enabled 
+     *  1: Peripheral increment mode enabled
     */
     pub fn enable_peripheral_increment_mode(&mut self, enable: bool) {
         self.0 &= !(CCR_PINC);
@@ -146,7 +150,7 @@ impl CCR {
     /* Bit 7 MINC: Memory increment mode
      *  This bit is set and cleared by software.
      *  0: Memory increment mode disabled
-     *  1: Memory increment mode enabled 
+     *  1: Memory increment mode enabled
     */
     pub fn enable_memory_increment_mode(&mut self, enable: bool) {
         self.0 &= !(CCR_MINC);
@@ -215,7 +219,7 @@ impl CCR {
     /* Bit 14 MEM2MEM: Memory to memory mode
      *  This bit is set and cleared by software.
      *  0: Memory to memory mode disabled
-     *  1: Memory to memory mode enabled 
+     *  1: Memory to memory mode enabled
     */
     pub fn enable_mem2mem_mode(&mut self, enable: bool) {
         self.0 &= !(CCR_MEM2MEM);
@@ -238,6 +242,156 @@ mod tests {
         assert_eq!(ccr.0, 0b1);
 
         ccr.enable_dma(false);
+        assert_eq!(ccr.0, 0b0);
+    }
+
+    #[test]
+    fn test_ccr_enable_transmit_complete_interrupt() {
+        let mut ccr = CCR(0);
+        assert_eq!(ccr.0, 0b0);
+
+        ccr.enable_transmit_complete_interrupt(true);
+        assert_eq!(ccr.0, 0b1 << 1);
+
+        ccr.enable_transmit_complete_interrupt(false);
+        assert_eq!(ccr.0, 0b0);
+    }
+
+    #[test]
+    fn test_ccr_enable_half_transfer_interrupt() {
+        let mut ccr = CCR(0);
+        assert_eq!(ccr.0, 0b0);
+
+        ccr.enable_half_transfer_interrupt(true);
+        assert_eq!(ccr.0, 0b1 << 2);
+
+        ccr.enable_half_transfer_interrupt(false);
+        assert_eq!(ccr.0, 0b0);
+    }
+
+    #[test]
+    fn test_ccr_enable_transfer_error_interrupt() {
+        let mut ccr = CCR(0);
+        assert_eq!(ccr.0, 0b0);
+
+        ccr.enable_transfer_error_interrupt(true);
+        assert_eq!(ccr.0, 0b1 << 3);
+
+        ccr.enable_transfer_error_interrupt(false);
+        assert_eq!(ccr.0, 0b0);
+    }
+
+    #[test]
+    fn test_ccr_set_data_transfer_direction() {
+        let mut ccr = CCR(0);
+        assert_eq!(ccr.0, 0b0);
+
+        ccr.set_data_transfer_direction(DataDirection::FromMem);
+        assert_eq!(ccr.0, 1 << 4);
+
+        ccr.set_data_transfer_direction(DataDirection::FromPeriph);
+        assert_eq!(ccr.0, 0b0);
+    }
+
+    #[test]
+    fn test_ccr_enable_circular_mode() {
+        let mut ccr = CCR(0);
+        assert_eq!(ccr.0, 0b0);
+
+        ccr.enable_circular_mode(true);
+        assert_eq!(ccr.0, 0b1 << 5);
+
+        ccr.enable_circular_mode(false);
+        assert_eq!(ccr.0, 0b0);
+    }
+
+    #[test]
+    fn test_ccr_enable_peripheral_increment_mode() {
+        let mut ccr = CCR(0);
+        assert_eq!(ccr.0, 0b0);
+
+        ccr.enable_peripheral_increment_mode(true);
+        assert_eq!(ccr.0, 0b1 << 6);
+
+        ccr.enable_peripheral_increment_mode(false);
+        assert_eq!(ccr.0, 0b0);
+    }
+
+    #[test]
+    fn test_ccr_enable_memory_increment_mode() {
+        let mut ccr = CCR(0);
+        assert_eq!(ccr.0, 0b0);
+
+        ccr.enable_memory_increment_mode(true);
+        assert_eq!(ccr.0, 0b1 << 7);
+
+        ccr.enable_memory_increment_mode(false);
+        assert_eq!(ccr.0, 0b0);
+    }
+
+    #[test]
+    fn test_ccr_set_peripheral_size() {
+        let mut ccr = CCR(0);
+        assert_eq!(ccr.0, 0b0);
+
+        ccr.set_peripheral_size(PeriphAndMemSize::Sixteen);
+        assert_eq!(ccr.0, 0b1 << 8);
+
+        ccr.set_peripheral_size(PeriphAndMemSize::ThirtyTwo);
+        assert_eq!(ccr.0, 0b1 << 9);
+
+        ccr.set_peripheral_size(PeriphAndMemSize::Reserved);
+        assert_eq!(ccr.0, 0b11 << 8);
+
+        ccr.set_peripheral_size(PeriphAndMemSize::Eight);
+        assert_eq!(ccr.0, 0b0);
+    }
+
+    #[test]
+    fn test_ccr_set_memory_size() {
+        let mut ccr = CCR(0);
+        assert_eq!(ccr.0, 0b0);
+
+        ccr.set_memory_size(PeriphAndMemSize::Sixteen);
+        assert_eq!(ccr.0, 0b1 << 10);
+
+        ccr.set_memory_size(PeriphAndMemSize::ThirtyTwo);
+        assert_eq!(ccr.0, 0b1 << 11);
+
+        ccr.set_memory_size(PeriphAndMemSize::Reserved);
+        assert_eq!(ccr.0, 0b11 << 10);
+
+        ccr.set_memory_size(PeriphAndMemSize::Eight);
+        assert_eq!(ccr.0, 0b0);
+    }
+
+    #[test]
+    fn test_ccr_set_channel_priority() {
+        let mut ccr = CCR(0);
+        assert_eq!(ccr.0, 0b0);
+
+        ccr.set_channel_priority(ChannelPriorityLevel::Medium);
+        assert_eq!(ccr.0, 0b1 << 12);
+
+        ccr.set_channel_priority(ChannelPriorityLevel::High);
+        assert_eq!(ccr.0, 0b1 << 13);
+
+        ccr.set_channel_priority(ChannelPriorityLevel::VeryHigh);
+        assert_eq!(ccr.0, 0b11 << 12);
+
+        ccr.set_channel_priority(ChannelPriorityLevel::Low);
+        assert_eq!(ccr.0, 0b0);
+    }
+
+    #[test]
+    fn test_ccr_enable_mem2mem_mode() {
+        let mut ccr = CCR(0);
+        assert_eq!(ccr.0, 0b0);
+
+        ccr.enable_mem2mem_mode(true);
+        assert_eq!(ccr.0, 1 << 14);
+
+        ccr.enable_mem2mem_mode(false);
         assert_eq!(ccr.0, 0b0);
     }
 }

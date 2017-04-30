@@ -15,7 +15,9 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#[derive(Copy, Clone, Debug)]
 pub struct CMAR(u32);
+
 impl CMAR {
     /* Bits 31:0 MA[31:0]: Memory address Base address of the memory area from/to which
      *   the data will be read/written.
@@ -24,7 +26,7 @@ impl CMAR {
      * When MSIZE is 10 (32-bit), MA[1:0] are ignored. Access is automatically aligned
      *   to a word address.
      */
-    pub fn set_ma(mem_addr: u32) {
+    pub fn set_ma(&mut self, mem_addr: u32) {
         self.0 = mem_addr;
     }
 }

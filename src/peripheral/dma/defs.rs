@@ -38,38 +38,38 @@ pub const IFCR_OFFSET: u32 = 0x04;
 
 // IFCR Channel 1
 // ------------------------------------
-pub const DMAx_CGIF_1:  u32 = 0b1;
-pub const DMAx_CTCIF_1: u32 = 0b1 << 1;
-pub const DMAx_CHTIF_1: u32 = 0b1 << 2;
-pub const DMAx_CTEIF_1: u32 = 0b1 << 3;
+pub const DMA_CGIF_1:  u32 = 0b1;
+pub const DMA_CTCIF_1: u32 = 0b1 << 1;
+pub const DMA_CHTIF_1: u32 = 0b1 << 2;
+pub const DMA_CTEIF_1: u32 = 0b1 << 3;
 
 // IFCR Channel 2
 // ------------------------------------
-pub const DMAx_CGIF_2:  u32 = 0b1 << 4;
-pub const DMAx_CTCIF_2: u32 = 0b1 << 5;
-pub const DMAx_CHTIF_2: u32 = 0b1 << 6;
-pub const DMAx_CTEIF_2: u32 = 0b1 << 7;
+pub const DMA_CGIF_2:  u32 = 0b1 << 4;
+pub const DMA_CTCIF_2: u32 = 0b1 << 5;
+pub const DMA_CHTIF_2: u32 = 0b1 << 6;
+pub const DMA_CTEIF_2: u32 = 0b1 << 7;
 
 // IFCR Channel 3
 // ------------------------------------
-pub const DMAx_CGIF_3:  u32 = 0b1 << 8;
-pub const DMAx_CTCIF_3: u32 = 0b1 << 9;
-pub const DMAx_CHTIF_3: u32 = 0b1 << 10;
-pub const DMAx_CTEIF_3: u32 = 0b1 << 11;
+pub const DMA_CGIF_3:  u32 = 0b1 << 8;
+pub const DMA_CTCIF_3: u32 = 0b1 << 9;
+pub const DMA_CHTIF_3: u32 = 0b1 << 10;
+pub const DMA_CTEIF_3: u32 = 0b1 << 11;
 
 // IFCR Channel 4
 // ------------------------------------
-pub const DMAx_CGIF_4:  u32 = 0b1 << 12;
-pub const DMAx_CTCIF_4: u32 = 0b1 << 13;
-pub const DMAx_CHTIF_4: u32 = 0b1 << 14;
-pub const DMAx_CTEIF_4: u32 = 0b1 << 15;
+pub const DMA_CGIF_4:  u32 = 0b1 << 12;
+pub const DMA_CTCIF_4: u32 = 0b1 << 13;
+pub const DMA_CHTIF_4: u32 = 0b1 << 14;
+pub const DMA_CTEIF_4: u32 = 0b1 << 15;
 
 // IFCR Channel 5
 // ------------------------------------
-pub const DMAx_CGIF_5:  u32 = 0b1 << 16;
-pub const DMAx_CTCIF_5: u32 = 0b1 << 17;
-pub const DMAx_CHTIF_5: u32 = 0b1 << 18;
-pub const DMAx_CTEIF_5: u32 = 0b1 << 19;
+pub const DMA_CGIF_5:  u32 = 0b1 << 16;
+pub const DMA_CTCIF_5: u32 = 0b1 << 17;
+pub const DMA_CHTIF_5: u32 = 0b1 << 18;
+pub const DMA_CTEIF_5: u32 = 0b1 << 19;
 
 // ------------------------------------
 // CCRx Bit definitions (x = 1-5, stm32F04 has 5 DMA channels)
