@@ -15,4 +15,9 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#[derive(Copy, Clone, Debug)]
+pub struct CCR(u32);
 
+impl CCR {
+
+}

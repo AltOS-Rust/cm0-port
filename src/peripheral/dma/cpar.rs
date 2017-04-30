@@ -15,4 +15,12 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#[derive(Copy, Clone, Debug)]
+pub struct CPAR(u32);
+
+impl CPAR {
+    pub fn set_pa(&mut self, periph_addr: u32) {
+        self.0 = periph_addr;
+    }
+}
 
