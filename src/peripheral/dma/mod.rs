@@ -31,8 +31,26 @@ use self::cmar::CMAR;
 use self::ifcr::IFCR;
 use self::defs::*;
 
+
+/// Defines the availabe DMA Channels for STM32F04.
+///
+/// Used as C-like enum in order to index into array of DMAChannelRegs.
 #[derive(Copy, Clone, Debug)]
-struct DMAChannel {
+pub enum DMAChannel {
+    /// DMA Channel 1 (Index 0)
+    One,
+    /// DMA Channel 2 (Index 1)
+    Two,
+    /// DMA Channel 3 (Index 2)
+    Three,
+    /// DMA Channel 4 (Index 3)
+    Four,
+    /// DMA Channel 5 (Index 4)
+    Five,
+}
+
+#[derive(Copy, Clone, Debug)]
+struct DMAChannelRegs {
     ccr: CCR,
     cndtr: CNDTR,
     cpar: CPAR,
@@ -46,14 +64,18 @@ struct DMAChannel {
 pub struct RawDMA {
     isr: u32,
     ifcr: IFCR,
-    channel: [DMAChannel; 5]
+    channel: [DMAChannelRegs; 5]
 }
 
 #[derive(Copy, Clone, Debug)]
 pub struct DMA(Volatile<RawDMA>);
 
 impl DMA {
-
+    pub fn new() -> Self {
+        unsafe {
+            DMA(Volatile::new(DMA_ADDR as *const _))
+        }
+    }
 }
 
 impl Deref for DMA {
