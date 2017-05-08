@@ -82,10 +82,15 @@ pub struct RawDMA {
     channel: [DMAChannelRegs; 5]
 }
 
+/// The DMA peripheral is used to provide high-speed data transfer between peripherals
+/// and memory as well as memory to memory. This struct is used to configure the DMA,
+/// manage DMA channels, and handle DMA interrupts.
 #[derive(Copy, Clone, Debug)]
 pub struct DMA(Volatile<RawDMA>);
 
 impl DMA {
+    /// Creates a new DMA object to configure the specifications for the
+    /// DMA peripheral.
     pub fn new() -> Self {
         unsafe {
             DMA(Volatile::new(DMA_ADDR as *const _))
@@ -108,6 +113,34 @@ impl DerefMut for DMA {
 }
 
 impl RawDMA {
+    /// Clear all DMA interrupt flags.
+    pub fn channel_global_interrupt_clear(&mut self, chan: DMAChannel) {
+        self.ifcr.channel_global_interrupt_clear(chan);
+    }
+
+    /// Clear the TC flag. The TC flag is set when the transfer of data has completed.
+    pub fn channel_transfer_complete_clear(&mut self, chan: DMAChannel) {
+        self.ifcr.channel_transfer_complete_clear(chan);
+    }
+
+    /// Clear the HTC flag. The HTC flag is set when half the data to be
+    /// transfered has completed.
+    pub fn channel_half_transfer_clear(&mut self, chan: DMAChannel) {
+        self.ifcr.channel_half_transfer_clear(chan);
+    }
+
+    /// Clear the TE flag.
+    ///
+    /// This interrupt occurs when an error is generated through a read or write access.
+    /// If a transfer error is generated, the faulty channel is disabled through a
+    /// hardware clear of the EN bit in the corresponding Channel configuration
+    /// register (DMA_CCRx).
+    pub fn channel_transfer_error_clear(&mut self, chan: DMAChannel) {
+        self.ifcr.channel_transfer_error_clear(chan);
+    }
+
+    // --------------------------------------------------------------
+
     /// Enable the DMA.
     pub fn enable_dma(&mut self, chan: DMAChannel) {
         self.channel[chan].ccr.enable_dma(true);
@@ -128,12 +161,12 @@ impl RawDMA {
         self.channel[chan].ccr.enable_transmit_complete_interrupt(false);
     }
 
-    /// Enable HT interrupt. This interrupt occurs when half of of the bytes are transferred.
+    /// Enable HT interrupt. This interrupt occurs when half of the bytes are transferred.
     pub fn enable_half_transfer_interrupt(&mut self, chan: DMAChannel) {
         self.channel[chan].ccr.enable_half_transfer_interrupt(true);
     }
 
-    /// Disable HT interrupt. This interrupt occurs when half of of the bytes are transferred.
+    /// Disable HT interrupt. This interrupt occurs when half of the bytes are transferred.
     pub fn disable_half_transfer_interrupt(&mut self, chan: DMAChannel) {
         self.channel[chan].ccr.enable_half_transfer_interrupt(false);
     }
@@ -186,23 +219,23 @@ impl RawDMA {
         self.channel[chan].ccr.enable_circular_mode(false);
     }
 
+    /* The address of the next transfer will be the previous one incremented by 1, 2, or 4
+     * depending on the chosen data size.
+     *
+     * The first transfer address is the one programmed in the DMA_CPAR/DMA_CMAR registers.
+     * During transfer operations, these registers keep the initally programmed value.
+     * The current transfer addresses (in the current internal peripheral/memory address
+     * register) are not accessible by software.
+     *
+     * Note: If the channel is configured in non-circular mode, no DMA request is served
+     * after the last transfer (once the number of items to be transferred has reached zero).
+     * In order to reload a new number of data items to be transferred into the DMA_CNDTRx
+     * register, the DMA channel must be disabled.
+     */
     /// Enable peripheral increment mode.
     ///
     /// When enabled automatically post-increments the peripheral pointer
     /// after each transaction.
-    /* The address of the next transfer will be the
-     * previous one incremented by 1, 2, or 4 depending on the chosen data size.
-     *
-     * The first transfer address is the one programmed in the DMA_CPAR/DMA_CMAR
-     * registers. During transfer operations, these registers keep the initally
-     * programmed value. The current transfer addresses (in the current internal
-     * peripheral/memory address register) are not accessible by software.
-     *
-     * Note: If the channel is configured in non-circular mode, no DMA request is
-     * served after the last transfer (once the number of items to be transferred
-     * has reached zero). In order to reload a new number of data items to be
-     * transferred into the DMA_CNDTRx register, the DMA channel must be disabled.
-     */
     pub fn enable_peripheral_increment_mode(&mut self, chan: DMAChannel) {
         self.channel[chan].ccr.enable_peripheral_increment_mode(true);
     }
@@ -267,32 +300,26 @@ impl RawDMA {
         self.channel[chan].ccr.enable_mem2mem_mode(false);
     }
 
+    /// Set the number of data to be transferred. Up to 65535.
     pub fn set_number_of_data(&mut self, chan: DMAChannel, num_data: u16) {
         self.channel[chan].cndtr.set_ndt(num_data);
     }
 
+    /// Set the peripheral address.
+    ///
+    /// This is the base address of the peripheral that is using the DMA.
+    /// The data will be moved from/to this address to/from the memory after
+    /// the peripheral event.
     pub fn set_peripheral_address(&mut self, chan: DMAChannel, periph_addr: u32) {
         self.channel[chan].cpar.set_pa(periph_addr);
     }
 
+    /// Set the memory address.
+    ///
+    /// This is the memory address where the data will be written to or read from
+    /// after the peripheral event.
     pub fn set_memory_address(&mut self, chan: DMAChannel, mem_addr: u32) {
         self.channel[chan].cmar.set_ma(mem_addr);
-    }
-
-    pub fn channel_global_interrupt_clear(&mut self, chan: DMAChannel) {
-        self.ifcr.channel_global_interrupt_clear(chan);
-    }
-
-    pub fn channel_transfer_complete_clear(&mut self, chan: DMAChannel) {
-        self.ifcr.channel_transfer_complete_clear(chan);
-    }
-
-    pub fn channel_half_transfer_clear(&mut self, chan: DMAChannel) {
-        self.ifcr.channel_half_transfer_clear(chan);
-    }
-
-    pub fn channel_transfer_error_clear(&mut self, chan: DMAChannel) {
-        self.ifcr.channel_transfer_error_clear(chan);
     }
 }
 

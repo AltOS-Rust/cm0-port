@@ -22,18 +22,42 @@ use super::defs::*;
 pub struct IFCR(u32);
 
 impl IFCR {
+    /* Bits 24, 20, 16, 12, 8, 4, 0
+        CGIFx: Channel x global interrupt clear (x = 1..7 for DMA and x = 1..5 for DMA2)
+        This bit is set by software.
+        0: No effect
+        1: Clears the GIF, TEIF, HTIF and TCIF flags in the DMA_ISR register
+    */
     pub fn channel_global_interrupt_clear(&mut self, chan: DMAChannel) {
         self.0 |= DMA_CGIF_1 << (4 * (chan as u32));
     }
 
+    /* Bits 25, 21, 17, 13, 9, 5, 1
+        CTCIFx: Channel x transfer complete clear (x = 1..7 for DMA and x = 1..5 for DMA2)
+        This bit is set by software.
+        0: No effect
+        1: Clears the corresponding TCIF flag in the DMA_ISR register
+    */
     pub fn channel_transfer_complete_clear(&mut self, chan: DMAChannel) {
         self.0 |= DMA_CTCIF_1 << (4 * (chan as u32));
     }
 
+    /* Bits 26, 22, 18, 14, 10, 6, 2
+        CHTIFx: Channel x half transfer clear (x = 1..7 for DMA and x = 1..5 for DMA2)
+        This bit is set by software.
+        0: No effect
+        1: Clears the corresponding HTIF flag in the DMA_ISR register
+    */
     pub fn channel_half_transfer_clear(&mut self, chan: DMAChannel) {
         self.0 |= DMA_CHTIF_1 << (4 * (chan as u32));
     }
 
+    /* Bits 27, 23, 19, 15, 11, 7, 3
+        CTEIFx: Channel x transfer error clear (x = 1..7 for DMA and x = 1..5 for DMA2)
+        This bit is set by software.
+        0: No effect
+        1: Clears the corresponding TEIF flag in the DMA_ISR register
+    */
     pub fn channel_transfer_error_clear(&mut self, chan: DMAChannel) {
         self.0 |= DMA_CTEIF_1 << (4 * (chan as u32));
     }

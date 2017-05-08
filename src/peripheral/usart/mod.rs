@@ -84,7 +84,7 @@ pub struct RawUsart {
     tdr: TDR,
 }
 
-/// Usart is the serial peripheral. This type is used to configure
+/// Usart is the serial peripheral. This struct is used to configure
 /// the serial peripheral to send and receive data through the serial bus.
 #[derive(Copy, Clone, Debug)]
 pub struct Usart(Volatile<RawUsart>);
