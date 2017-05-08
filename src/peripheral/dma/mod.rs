@@ -22,7 +22,8 @@ mod cmar;
 mod defs;
 mod ifcr;
 
-use core::ops::{Deref, DerefMut};
+use peripheral::{rcc};
+use core::ops::{Deref, DerefMut, Index, IndexMut};
 use volatile::Volatile;
 use self::ccr::CCR;
 use self::cndtr::CNDTR;
@@ -30,7 +31,21 @@ use self::cpar::CPAR;
 use self::cmar::CMAR;
 use self::ifcr::IFCR;
 use self::defs::*;
+use self::ccr::{DataDirection, PeriphAndMemSize, ChannelPriorityLevel};
 
+impl Index<DMAChannel> for [DMAChannelRegs] {
+    type Output = DMAChannelRegs;
+
+    fn index(&self, chan: DMAChannel) -> &Self::Output {
+        &self[chan as usize]
+    }
+}
+
+impl IndexMut<DMAChannel> for [DMAChannelRegs] {
+    fn index_mut(&mut self, chan: DMAChannel) -> &mut DMAChannelRegs {
+        &mut self[chan as usize]
+    }
+}
 
 /// Defines the availabe DMA Channels for STM32F04.
 ///
@@ -93,8 +108,209 @@ impl DerefMut for DMA {
 }
 
 impl RawDMA {
+    /// Enable the DMA.
+    pub fn enable_dma(&mut self, chan: DMAChannel) {
+        self.channel[chan].ccr.enable_dma(true);
+    }
 
+    /// Disable the DMA.
+    pub fn disable_dma(&mut self, chan: DMAChannel) {
+        self.channel[chan].ccr.enable_dma(false);
+    }
+
+    /// Enable TC interrupt. This interrupt occurs at the end of the transfer.
+    pub fn enable_transmit_complete_interrupt(&mut self, chan: DMAChannel) {
+        self.channel[chan].ccr.enable_transmit_complete_interrupt(true);
+    }
+
+    /// Disable TC interrupt. This interrupt occurs at the end of the transfer.
+    pub fn disable_transmit_complete_interrupt(&mut self, chan: DMAChannel) {
+        self.channel[chan].ccr.enable_transmit_complete_interrupt(false);
+    }
+
+    /// Enable HT interrupt. This interrupt occurs when half of of the bytes are transferred.
+    pub fn enable_half_transfer_interrupt(&mut self, chan: DMAChannel) {
+        self.channel[chan].ccr.enable_half_transfer_interrupt(true);
+    }
+
+    /// Disable HT interrupt. This interrupt occurs when half of of the bytes are transferred.
+    pub fn disable_half_transfer_interrupt(&mut self, chan: DMAChannel) {
+        self.channel[chan].ccr.enable_half_transfer_interrupt(false);
+    }
+
+    /// Enable TE interrupt.
+    ///
+    /// This interrupt occurs when an error is generated through a read or write access.
+    /// If a transfer error is generated, the faulty channel is disabled through a
+    /// hardware clear of the EN bit in the corresponding Channel configuration
+    /// register (DMA_CCRx).
+    pub fn enable_transfer_error_interrupt(&mut self, chan: DMAChannel) {
+        self.channel[chan].ccr.enable_transfer_error_interrupt(true);
+    }
+
+    /// Disable TE interrupt.
+    ///
+    /// This interrupt occurs when an error is generated through a read or write access.
+    /// If a transfer error is generated, the faulty channel is disabled through a
+    /// hardware clear of the EN bit in the corresponding Channel configuration
+    /// register (DMA_CCRx).
+    pub fn disable_transfer_error_interrupt(&mut self, chan: DMAChannel) {
+        self.channel[chan].ccr.enable_transfer_error_interrupt(false);
+    }
+
+    /// Set the transfer direction to either read from memory or read from the peripheral.
+    ///
+    /// This interrupt occurs when an error is generated through a read or write access.
+    /// If a transfer error is generated, the faulty channel is disabled through a
+    /// hardware clear of the EN bit in the corresponding Channel configuration
+    /// register (DMA_CCRx).
+    pub fn set_data_transfer_direction(&mut self, chan: DMAChannel, data_dir: DataDirection) {
+        self.channel[chan].ccr.set_data_transfer_direction(data_dir);
+    }
+
+    /// Enable circular mode.
+    ///
+    /// When enabled, the number of data to be transferred is automaticaly reloaded
+    /// with the initial value programmed during the channel configuration phase,
+    /// and the DMA requests continue to be served.
+    pub fn enable_circular_mode(&mut self, chan: DMAChannel) {
+        self.channel[chan].ccr.enable_circular_mode(true);
+    }
+
+    /// Disable circular mode.
+    ///
+    /// When enabled, the number of data to be transferred is automaticaly reloaded
+    /// with the initial value programmed during the channel configuration phase,
+    /// and the DMA requests continue to be served.
+    pub fn disable_circular_mode(&mut self, chan: DMAChannel) {
+        self.channel[chan].ccr.enable_circular_mode(false);
+    }
+
+    /// Enable peripheral increment mode.
+    ///
+    /// When enabled automatically post-increments the peripheral pointer
+    /// after each transaction.
+    /* The address of the next transfer will be the
+     * previous one incremented by 1, 2, or 4 depending on the chosen data size.
+     *
+     * The first transfer address is the one programmed in the DMA_CPAR/DMA_CMAR
+     * registers. During transfer operations, these registers keep the initally
+     * programmed value. The current transfer addresses (in the current internal
+     * peripheral/memory address register) are not accessible by software.
+     *
+     * Note: If the channel is configured in non-circular mode, no DMA request is
+     * served after the last transfer (once the number of items to be transferred
+     * has reached zero). In order to reload a new number of data items to be
+     * transferred into the DMA_CNDTRx register, the DMA channel must be disabled.
+     */
+    pub fn enable_peripheral_increment_mode(&mut self, chan: DMAChannel) {
+        self.channel[chan].ccr.enable_peripheral_increment_mode(true);
+    }
+
+    /// Disable peripheral increment mode.
+    ///
+    /// When enabled automatically post-increments the peripheral pointer
+    /// after each transaction.
+    pub fn disable_peripheral_increment_mode(&mut self, chan: DMAChannel) {
+        self.channel[chan].ccr.enable_peripheral_increment_mode(false);
+    }
+
+    /// Enable memory increment mode.
+    ///
+    /// When enabled automatically post-increments the memory pointer
+    /// after each transaction.
+    pub fn enable_memory_increment_mode(&mut self, chan: DMAChannel) {
+        self.channel[chan].ccr.enable_memory_increment_mode(true);
+    }
+
+    /// Disable memory increment mode.
+    ///
+    /// When enabled automatically post-increments the memory pointer
+    /// after each transaction.
+    pub fn disable_memory_increment_mode(&mut self, chan: DMAChannel) {
+        self.channel[chan].ccr.enable_memory_increment_mode(false);
+    }
+
+    /// Sets the peripheral data size.
+    pub fn set_peripheral_size(&mut self, chan: DMAChannel, periph_size: PeriphAndMemSize) {
+        self.channel[chan].ccr.set_peripheral_size(periph_size);
+    }
+
+    /// Sets the memory data size.
+    pub fn set_memory_size(&mut self, chan: DMAChannel, mem_size: PeriphAndMemSize) {
+        self.channel[chan].ccr.set_memory_size(mem_size);
+    }
+
+    /// Sets the channel priority.
+    ///
+    /// If two channels have the same priority, the lowest number channel will
+    /// have priority over the higher number channel.
+    pub fn set_channel_priority(&mut self, chan: DMAChannel, chan_priority: ChannelPriorityLevel) {
+        self.channel[chan].ccr.set_channel_priority(chan_priority);
+    }
+
+    /// Enable memory-to-memory transfers.
+    ///
+    /// When enabled, the DMA channels can work without being triggered by a request
+    /// from a peripheral. The transfer stops once teh DMA_CNDTRx register reaches
+    /// zero. Memory-to-memory mode cannot be used at the same time as circular mode.
+    pub fn enable_mem2mem_mode(&mut self, chan: DMAChannel) {
+        self.channel[chan].ccr.enable_mem2mem_mode(true);
+    }
+
+    /// Disable memory-to-memory transfers.
+    ///
+    /// When enabled, the DMA channels can work without being triggered by a request
+    /// from a peripheral. The transfer stops once teh DMA_CNDTRx register reaches
+    /// zero. Memory-to-memory mode cannot be used at the same time as circular mode.
+    pub fn disable_mem2mem_mode(&mut self, chan: DMAChannel) {
+        self.channel[chan].ccr.enable_mem2mem_mode(false);
+    }
+
+    pub fn set_number_of_data(&mut self, chan: DMAChannel, num_data: u16) {
+        self.channel[chan].cndtr.set_ndt(num_data);
+    }
+
+    pub fn set_peripheral_address(&mut self, chan: DMAChannel, periph_addr: u32) {
+        self.channel[chan].cpar.set_pa(periph_addr);
+    }
+
+    pub fn set_memory_address(&mut self, chan: DMAChannel, mem_addr: u32) {
+        self.channel[chan].cmar.set_ma(mem_addr);
+    }
+
+    pub fn channel_global_interrupt_clear(&mut self, chan: DMAChannel) {
+        self.ifcr.channel_global_interrupt_clear(chan);
+    }
+
+    pub fn channel_transfer_complete_clear(&mut self, chan: DMAChannel) {
+        self.ifcr.channel_transfer_complete_clear(chan);
+    }
+
+    pub fn channel_half_transfer_clear(&mut self, chan: DMAChannel) {
+        self.ifcr.channel_half_transfer_clear(chan);
+    }
+
+    pub fn channel_transfer_error_clear(&mut self, chan: DMAChannel) {
+        self.ifcr.channel_transfer_error_clear(chan);
+    }
 }
+
+/// Initialize the DMA peripheral
+///
+/// Set the clock for the DMA and makes the necessary calls in order to configure
+/// peripherals intended for use with the DMA.
+pub fn init() {
+    let mut rcc = rcc::rcc();
+    rcc.enable_peripheral(rcc::Peripheral::DMA);
+
+    init_usart(DMAChannel::Four, DMAChannel::Five);
+}
+
+fn init_usart(usart_tx: DMAChannel, usart_rx: DMAChannel) {
+    let mut dma = DMA::new();
+}
+
 
 
 
