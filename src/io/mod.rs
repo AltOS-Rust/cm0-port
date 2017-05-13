@@ -89,7 +89,7 @@ mod imp {
     impl Write for DMASerial {
         fn write_str(&mut self, string: &str) -> fmt::Result {
             dma::set_transfer(DMAChannel::Four,
-                              unsafe {USART2_ADDR.offset(TDR_OFFSET as isize)},
+                              unsafe {USART2_ADDR.offset((TDR_OFFSET/4) as isize)},
                               string.as_bytes());
 
             loop {}

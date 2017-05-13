@@ -22,6 +22,7 @@ mod cmar;
 mod defs;
 mod ifcr;
 
+use interrupt;
 use peripheral::{rcc};
 use peripheral::usart::{Usart, UsartX, DMAMode};
 use peripheral::usart::defs::{USART2_ADDR, TDR_OFFSET};
@@ -349,6 +350,8 @@ pub fn init() {
     let mut rcc = rcc::rcc();
     rcc.enable_peripheral(rcc::Peripheral::DMA);
 
+    let mut nvic = interrupt::nvic();
+    nvic.enable_interrupt(interrupt::Hardware::Dmach4Plus);
 }
 
 pub fn set_transfer(chan: DMAChannel, peripheral_addr: *const u32, memory_addr: &[u8]) {
