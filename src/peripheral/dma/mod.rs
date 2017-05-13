@@ -367,7 +367,7 @@ pub fn set_transfer(chan: DMAChannel, peripheral_addr: *const u32, memory_addr: 
     dma[chan].disable_peripheral_increment_mode();
     dma[chan].disable_circular_mode();
     dma[chan].disable_mem2mem_mode();
-    // dma[chan].enable_transmit_complete_interrupt();
+    dma[chan].enable_transmit_complete_interrupt();
     dma[chan].enable_dma();
 }
 
