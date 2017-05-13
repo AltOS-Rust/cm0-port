@@ -80,6 +80,12 @@ mod imp {
         usart: Usart,
     }
 
+    impl DMASerial {
+        fn new(usart: Usart) -> Self {
+            DMASerial { usart: usart }
+        }
+    }
+
     impl Write for DMASerial {
         fn write_str(&mut self, string: &str) -> fmt::Result {
             dma::set_transfer(DMAChannel::Four,
@@ -203,6 +209,15 @@ mod imp {
 
         let _g = WRITE_LOCK.lock();
         serial.write_str(s).ok();
+    }
+
+    #[doc(hidden)]
+    pub fn dma_write_str(s: &str) {
+        let usart2 = Usart::new(UsartX::Usart2);
+        let mut dma_serial = DMASerial::new(usart2);
+
+        let _g = WRITE_LOCK.lock();
+        dma_serial.write_str(s).ok();
     }
 
     // NOTE: debug assumes interrupts are turned off, so does not need lock.
