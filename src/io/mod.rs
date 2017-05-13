@@ -43,6 +43,8 @@ mod imp {
     use altos_core::collections::RingBuffer;
     use core::fmt::{self, Write, Arguments};
     use peripheral::usart::{UsartX, Usart, USART2_TX_CHAN, USART2_RX_CHAN};
+    use peripheral::usart::defs::*;
+    use peripheral::dma::{self, DMAChannel};
 
     /// A buffer for transmitting bytes.
     pub static mut TX_BUFFER: RingBuffer = RingBuffer::new();
@@ -73,6 +75,21 @@ mod imp {
         ($fmt:expr) => (print!(concat!($fmt, "\n")));
         ($fmt:expr, $($arg:tt)*) => (print!(concat!($fmt, "\n"), $($arg)*));
     }
+
+    struct DMASerial {
+        usart: Usart,
+    }
+
+    impl Write for DMASerial {
+        fn write_str(&mut self, string: &str) -> fmt::Result {
+            dma::set_transfer(DMAChannel::Four,
+                              unsafe {USART2_ADDR.offset(TDR_OFFSET as isize)},
+                              string.as_bytes());
+
+            loop {}
+        }
+    }
+
 
     struct Serial {
         usart: Usart,

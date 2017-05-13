@@ -302,6 +302,7 @@ pub fn init() {
     usart2.disable_usart();
 
     usart2.set_word_length(WordLength::Eight);
+    usart2.set_dma_mode(DMAMode::All);
     usart2.set_mode(Mode::All);
     usart2.set_parity(Parity::None);
     usart2.set_hardware_flow_control(HardwareFlowControl::None);

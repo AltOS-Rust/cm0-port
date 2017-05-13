@@ -349,21 +349,26 @@ pub fn init() {
     let mut rcc = rcc::rcc();
     rcc.enable_peripheral(rcc::Peripheral::DMA);
 
-    init_usart(DMAChannel::Four, DMAChannel::Five);
 }
 
-fn init_usart(usart_tx: DMAChannel, usart_rx: DMAChannel) {
+pub fn set_transfer(chan: DMAChannel, peripheral_addr: *const u32, memory_addr: &[u8]) {
     let mut dma = DMA::new();
 
-    // Enable DMA bits on the Usart2 peripheral.
-    let mut usart2 = Usart::new(UsartX::Usart2);
-    usart2.set_dma_mode(DMAMode::All);
+    dma[chan].disable_dma();
+    dma[chan].set_peripheral_address(peripheral_addr);
+    dma[chan].set_memory_address(memory_addr.as_ptr() as *const u32);
 
-    dma[usart_tx].disable_dma();
-    unsafe {
-        dma[usart_tx].set_peripheral_address(USART2_ADDR.offset(TDR_OFFSET as isize));
-    }
-    dma[usart_tx].set_memory_address(&TX_BUFFER);
+    dma[chan].set_channel_priority(ChannelPriorityLevel::Medium);
+    dma[chan].set_memory_size(PeriphAndMemSize::Eight);
+    dma[chan].set_peripheral_size(PeriphAndMemSize::Eight);
+    dma[chan].set_data_transfer_direction(DataDirection::FromMem);
+    dma[chan].enable_memory_increment_mode();
+    dma[chan].set_number_of_data(memory_addr.len() as u16);
+    dma[chan].disable_peripheral_increment_mode();
+    dma[chan].disable_circular_mode();
+    dma[chan].disable_mem2mem_mode();
+    // dma[chan].enable_transmit_complete_interrupt();
+    dma[chan].enable_dma();
 }
 
 
