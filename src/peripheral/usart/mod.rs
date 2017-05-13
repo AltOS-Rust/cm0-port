@@ -29,8 +29,9 @@
 //! This module is also responsible for initial setup of the Usart register
 //! (Either Usart1 or Usart2).
 
+pub mod defs;
+
 mod control;
-mod defs;
 mod baudr;
 mod tdr;
 mod rdr;
@@ -301,7 +302,6 @@ pub fn init() {
     usart2.disable_usart();
 
     usart2.set_word_length(WordLength::Eight);
-    usart2.set_dma_mode(DMAMode::All);
     usart2.set_mode(Mode::All);
     usart2.set_parity(Parity::None);
     usart2.set_hardware_flow_control(HardwareFlowControl::None);

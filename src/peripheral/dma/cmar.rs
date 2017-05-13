@@ -26,8 +26,12 @@ impl CMAR {
      * When MSIZE is 10 (32-bit), MA[1:0] are ignored. Access is automatically aligned
      *   to a word address.
      */
-    pub fn set_ma(&mut self, mem_addr: u32) {
-        self.0 = mem_addr;
+    /// Set the memory address.
+    ///
+    /// This is the memory address where the data will be written to or read from
+    /// after the peripheral event.
+    pub fn set_ma(&mut self, mem_addr: *const u32) {
+        self.0 = mem_addr as u32;
     }
 }
 

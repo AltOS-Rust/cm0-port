@@ -22,6 +22,8 @@
  * and not being used, or not listed at all.
  */
 
+#![allow(missing_docs)]
+
 // Base addresses for USART 1 and 2
 pub const USART1_ADDR: *const u32 = 0x4001_3800 as *const _;
 pub const USART2_ADDR: *const u32 = 0x4000_4400 as *const _;

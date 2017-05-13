@@ -35,6 +35,7 @@ impl CNDTR {
      * If this register is zero, no transaction can be served whether the channel is
      *   enabled or not.
      */
+    /// Set the number of data to be transferred. Up to 65535.
     pub fn set_ndt(&mut self, num_data: u16) {
         self.0 = num_data as u32;
     }

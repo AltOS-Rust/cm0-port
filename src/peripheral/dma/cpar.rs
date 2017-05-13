@@ -27,8 +27,13 @@ impl CPAR {
      * When PSIZE is 10 (32-bit), PA[1:0] are ignored.
      *   Access is automatically aligned to a word address.
     */
-    pub fn set_pa(&mut self, periph_addr: u32) {
-        self.0 = periph_addr;
+    /// Set the peripheral address.
+    ///
+    /// This is the base address of the peripheral that is using the DMA.
+    /// The data will be moved from/to this address to/from the memory after
+    /// the peripheral event.
+    pub fn set_pa(&mut self, periph_addr: *const u32) {
+        self.0 = periph_addr as u32;
     }
 }
 
