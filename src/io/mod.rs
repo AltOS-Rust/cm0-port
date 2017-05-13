@@ -40,7 +40,7 @@ mod imp {
     use altos_core::volatile::Volatile;
     use altos_core::syscall::sleep;
     use altos_core::sync::{Mutex, CriticalSection};
-    use altos_core::queue::RingBuffer;
+    use altos_core::collections::RingBuffer;
     use core::fmt::{self, Write, Arguments};
     use peripheral::usart::{UsartX, Usart, USART2_TX_CHAN, USART2_RX_CHAN};
 
