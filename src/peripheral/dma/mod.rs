@@ -37,6 +37,9 @@ use self::ifcr::IFCR;
 use self::defs::*;
 use self::ccr::{DataDirection, PeriphAndMemSize, ChannelPriorityLevel};
 
+pub const DMA_TX_CHAN4PLUS: usize = 26;
+pub const DMA_RX_CHAN4PLUS: usize = 26 * 3;
+
 impl Index<DMAChannel> for [DMAChannelRegs] {
     type Output = DMAChannelRegs;
 
@@ -373,32 +376,3 @@ pub fn set_transfer(chan: DMAChannel, peripheral_addr: *const u32, memory_addr: 
     dma[chan].enable_transmit_complete_interrupt();
     dma[chan].enable_dma();
 }
-
-
-
-
-// Channel configuration procedure
-// The following sequence should be followed to configure a DMA channel x (where x is the
-// channel number).
-// 1.Set the peripheral register address in the DMA_CPARx register. The data will be
-// moved from/ to this address to/ from the memory after the peripheral event.
-// 2. Set the memory address in the DMA_CMARx register. The data will be written to or
-// read from this memory after the peripheral event.
-// 3. Configure the total number of data to be transferred in the DMA_CNDTRx register.
-// After each peripheral event, this value will be decremented.
-// 4. Configure the channel priority using the PL[1:0] bits in the DMA_CCRx register
-// 5. Configure data transfer direction, circular mode, peripheral & memory incremented
-// mode, peripheral & memory data size, and interrupt after half and/or full transfer in the
-// DMA_CCRx register
-// 6. Activate the channel by setting the ENABLE bit in the DMA_CCRx register.
-//
-// For code example refer to the Appendix section A.5.1: DMA Channel Configuration
-// sequence code example.
-//
-// As soon as the channel is enabled, it can serve any DMA request from the peripheral
-// connected on the channel.
-//
-// Once half of the bytes are transferred, the half-transfer flag (HTIF) is set and an interrupt is
-// generated if the Half-Transfer Interrupt Enable bit (HTIE) is set. At the end of the transfer,
-// the Transfer Complete Flag (TCIF) is set and an interrupt is generated if the Transfer
-// Complete Interrupt Enable bit (TCIE) is set.

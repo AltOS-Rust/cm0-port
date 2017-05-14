@@ -28,6 +28,7 @@
 
 #[cfg(feature="serial")]
 mod usart;
+mod dma;
 
 use altos_core::syscall;
 
@@ -62,7 +63,7 @@ pub static EXCEPTIONS: [Option<unsafe extern "C" fn()>; 46] = [
     Some(default_handler),  // Touch Sensing: 23
     Some(default_handler),  // DMA channel 1: 24
     Some(default_handler),  // DMA channel 2 and 3 and DMA2 channel 1 and 2: 25
-    Some(default_handler),  // DMA channel 4,5,6,7 and DMA2 channel 3,4,5: 26
+    Some(dma_chan4plus_handler),  // DMA channel 4,5,6,7 and DMA2 channel 3,4,5: 26
     Some(default_handler),  // ADC and COMP (ADC combined with EXTI lines 21 and 22): 27
     Some(default_handler),  // TIM1 break, update, trigger, communication: 28
     Some(default_handler),  // TIM1 capture compare: 29
@@ -306,4 +307,13 @@ unsafe extern "C" fn usart2_handler() {
     }
     #[cfg(not(feature="serial"))]
     default_handler();
+}
+
+// Interrupt handler for DMA Channels 4 and above.
+unsafe extern "C" fn dma_chan4plus_handler() {
+    use peripheral::dma::{DMA, DMAChannel};
+    use self::dma::{dma_tx};
+
+    let mut dma = DMA::new();
+    dma_tx(dma, DMAChannel::Four);
 }
