@@ -357,7 +357,7 @@ pub fn init() {
     nvic.enable_interrupt(interrupt::Hardware::Dmach4Plus);
 }
 
-pub fn set_transfer(chan: DMAChannel, peripheral_addr: *const u32, memory_addr: &[u8]) {
+pub fn set_dma_usart_tx(chan: DMAChannel, peripheral_addr: *const u32, memory_addr: &[u8]) {
     let mut dma = DMA::new();
 
     dma[chan].disable_dma();
