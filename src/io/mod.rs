@@ -44,7 +44,7 @@ mod imp {
     use core::fmt::{self, Write, Arguments};
     use peripheral::usart::{UsartX, Usart, USART2_TX_CHAN, USART2_RX_CHAN};
     use peripheral::usart::defs::*;
-    use peripheral::dma::{self, DMAChannel, DMA_TX_CHAN4PLUS, DMA_RX_CHAN4PLUS};
+    use peripheral::dma::{self, DMAChannel, DMA_TX_CHAN4PLUS};
 
     /// A buffer for transmitting bytes.
     pub static mut TX_BUFFER: RingBuffer = RingBuffer::new();

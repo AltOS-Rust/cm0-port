@@ -15,6 +15,20 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+//! This module is the highest level in the DMA hierarchy for implementing the
+//! Direct Memory Access driver.
+//!
+//! Configuration of each of the DMA registers, channel management, and the public
+//! functions used to initialize, configure, and manipulate the bits for each DMA
+//! register are defined in this file.
+//!
+//! The functions here are used as wrappers that pass the call down through each
+//! necessary level (one or more), until the actual register is reached and is
+//! able to set the bits for itself accordingly.
+//!
+//! This module is written for the STM32F04 which only has one DMA peripheral with
+//! channels 1 - 5.
+
 mod ccr;
 mod cndtr;
 mod cpar;
@@ -24,9 +38,6 @@ mod ifcr;
 
 use interrupt;
 use peripheral::{rcc};
-use peripheral::usart::{Usart, UsartX, DMAMode};
-use peripheral::usart::defs::{USART2_ADDR, TDR_OFFSET};
-use io::{TX_BUFFER, RX_BUFFER};
 use core::ops::{Deref, DerefMut, Index, IndexMut};
 use volatile::Volatile;
 use self::ccr::CCR;
@@ -37,8 +48,8 @@ use self::ifcr::IFCR;
 use self::defs::*;
 use self::ccr::{DataDirection, PeriphAndMemSize, ChannelPriorityLevel};
 
+/// Defines the wake/sleep channel for the USART TX on Channel 4.
 pub const DMA_TX_CHAN4PLUS: usize = 26;
-pub const DMA_RX_CHAN4PLUS: usize = 26 * 3;
 
 impl Index<DMAChannel> for [DMAChannelRegs] {
     type Output = DMAChannelRegs;
@@ -357,6 +368,7 @@ pub fn init() {
     nvic.enable_interrupt(interrupt::Hardware::Dmach4Plus);
 }
 
+/// Configure the DMA for Usart TX
 pub fn set_dma_usart_tx(chan: DMAChannel, peripheral_addr: *const u32, memory_addr: &[u8]) {
     let mut dma = DMA::new();
 

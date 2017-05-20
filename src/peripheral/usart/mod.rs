@@ -15,7 +15,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-//! This module is the highest level in the Usart heirarchy for implementing
+//! This module is the highest level in the Usart hierarchy for implementing
 //! the serial driver.
 //!
 //! Configuration for each of the two Usart registers, and each of the registers

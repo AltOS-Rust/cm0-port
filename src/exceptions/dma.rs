@@ -15,7 +15,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-use peripheral::dma::{DMA, DMAChannel, DMA_TX_CHAN4PLUS, DMA_RX_CHAN4PLUS};
+use peripheral::dma::{DMA, DMAChannel, DMA_TX_CHAN4PLUS};
 use altos_core::syscall;
 
 pub fn dma_tx(mut dma: DMA, chan: DMAChannel) {
