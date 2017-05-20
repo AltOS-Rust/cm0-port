@@ -368,7 +368,7 @@ pub fn init() {
     nvic.enable_interrupt(interrupt::Hardware::Dmach4Plus);
 }
 
-/// Configure the DMA for Usart TX
+/// Configure the DMA for Usart TX.
 pub fn set_dma_usart_tx(chan: DMAChannel, peripheral_addr: *const u32, memory_addr: &[u8]) {
     let mut dma = DMA::new();
 

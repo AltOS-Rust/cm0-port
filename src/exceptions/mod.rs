@@ -314,6 +314,6 @@ unsafe extern "C" fn dma_chan4plus_handler() {
     use peripheral::dma::{DMA, DMAChannel};
     use self::dma::{dma_tx};
 
-    let mut dma = DMA::new();
+    let dma = DMA::new();
     dma_tx(dma, DMAChannel::Four);
 }
