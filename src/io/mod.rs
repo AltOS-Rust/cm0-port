@@ -43,7 +43,8 @@ mod imp {
     use altos_core::collections::RingBuffer;
     use core::fmt::{self, Write, Arguments};
     use peripheral::usart::{UsartX, Usart, USART2_TX_CHAN, USART2_RX_CHAN};
-    use peripheral::usart::defs::*;
+
+    #[cfg(feature="dma")]
     use peripheral::dma::{self, DMAChannel, DMA_TX_CHAN4PLUS};
 
     /// A buffer for transmitting bytes.
@@ -86,8 +87,11 @@ mod imp {
         }
     }
 
+    #[cfg(feature="dma")]
     impl Write for DMASerial {
         fn write_str(&mut self, string: &str) -> fmt::Result {
+            use peripheral::usart::defs::*;
+
             let g = CriticalSection::begin();
             dma::set_dma_usart_tx(DMAChannel::Four,
                               unsafe {USART2_ADDR.offset((TDR_OFFSET/4) as isize)},
@@ -215,6 +219,7 @@ mod imp {
     }
 
     #[doc(hidden)]
+    #[cfg(feature="dma")]
     pub fn dma_write_str(s: &str) {
         let usart2 = Usart::new(UsartX::Usart2);
         let mut dma_serial = DMASerial::new(usart2);

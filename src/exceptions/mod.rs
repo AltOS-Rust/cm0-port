@@ -311,9 +311,15 @@ unsafe extern "C" fn usart2_handler() {
 
 // Interrupt handler for DMA Channels 4 and above.
 unsafe extern "C" fn dma_chan4plus_handler() {
-    use peripheral::dma::{DMA, DMAChannel};
-    use self::dma::{dma_tx};
+    #[cfg(feature="dma")]
+    {
+        use peripheral::dma::{DMA, DMAChannel};
+        use self::dma::{dma_tx};
 
-    let dma = DMA::new();
-    dma_tx(dma, DMAChannel::Four);
+        let dma = DMA::new();
+        dma_tx(dma, DMAChannel::Four);
+    }
+    #[cfg(not(feature="dma"))]
+    default_handler();
 }
+

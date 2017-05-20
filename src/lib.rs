@@ -242,6 +242,7 @@ fn init_usart() {
 }
 
 fn init_dma() {
+    #[cfg(feature="dma")]
     peripheral::dma::init();
 }
 
