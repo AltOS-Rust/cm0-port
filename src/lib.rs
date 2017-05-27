@@ -118,7 +118,7 @@ pub fn init() -> ! {
     init_ticks();
     init_usart();
     init_dma();
-unsafe { application_entry() };
+    unsafe { application_entry() };
 }
 
 fn init_data_segment() {

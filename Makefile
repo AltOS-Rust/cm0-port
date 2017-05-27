@@ -3,7 +3,7 @@ target = thumbv6m-none-eabi
 cargo-native = cargo
 cargo-target = xargo
 
-native-args = --features "test serial"
+native-args = --features "test"
 test-args = --features "test serial svc minicom"
 target-args = --target=$(target)
 

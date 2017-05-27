@@ -28,6 +28,7 @@
 
 #[cfg(feature="serial")]
 mod usart;
+#[cfg(feature="dma")]
 mod dma;
 
 use altos_core::syscall;

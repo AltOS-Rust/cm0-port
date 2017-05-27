@@ -15,7 +15,6 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#![cfg(feature="dma")]
 use peripheral::dma::{DMA, DMAChannel, DMA_TX_CHAN4PLUS};
 use altos_core::syscall;
 
