@@ -10,7 +10,7 @@ crate-type = ["rlib"]
 default = []
 
 doc = []
-dma = []
+dma = ["serial"]
 serial = []
 minicom = ["serial"]
 svc = ["altos_core/syscall"]
