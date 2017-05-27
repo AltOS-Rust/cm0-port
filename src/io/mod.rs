@@ -23,13 +23,13 @@
 //!
 //! This module contains implementations of helper macros for print and println.
 
+#[cfg(feature="serial")]
 mod serial;
 
-pub use io::serial::imp::*;
-pub use self::dma::*;
+pub use io::serial::*;
 
 #[cfg(not(feature="serial"))]
-mod imp {
+mod serial {
     use core::fmt::Arguments;
     #[no_mangle]
     #[doc(hidden)]
