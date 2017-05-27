@@ -18,7 +18,7 @@ extern crate arm;
 
 use peripheral::usart::{Usart, USART2_TX_CHAN, USART2_RX_CHAN};
 use altos_core::syscall;
-use peripheral::io::serial::{TX_BUFFER, RX_BUFFER};
+use io::{TX_BUFFER, RX_BUFFER};
 
 // Handles transmitting any bytes when an interrupt is generated
 pub fn usart_tx(mut usart: Usart) {
