@@ -282,7 +282,40 @@ impl CR2 {
     }
 }
 
+/// Defines the possible DMA Mode configurations for the Usart.
+pub enum DMAMode {
+    /// Usart DMA Transmit and Receive turned off.
+    None,
+    /// Usart DMA configuration to only receive.
+    Receive,
+    /// Usart DMA configuration to only transmit.
+    Transmit,
+    /// Usart DMA Transmit and Receive both turned on.
+    All,
+}
+
 impl CR3 {
+    /* Bit 6 DMAR: DMA enable receiver
+     *   This bit is set/reset by software
+     *      1: DMA mode is enabled for reception
+     *      0: DMA mode is disabled for reception
+     * Bit 7 DMAT: DMA enable transmitter
+     *  This bit is set/reset by software
+     *      1: DMA mode is enabled for transmission
+     *      0: DMA mode is disabled for transmission
+     */
+    pub fn set_dma_mode(&mut self, mode: DMAMode) {
+        let mask = match mode {
+            DMAMode::None => 0,
+            DMAMode::Receive => CR3_DMAR,
+            DMAMode::Transmit => CR3_DMAT,
+            DMAMode::All => (CR3_DMAR | CR3_DMAT),
+        };
+
+        self.0 &= !(CR3_DMAR | CR3_DMAT);
+        self.0 |= mask;
+    }
+
     /* Uses bit 8 and 9 in CR3 to set the hardware flow control to None, Rts,
      * Cts, All.
      *      Bit 8 RTSE: RTS enable
@@ -467,6 +500,23 @@ mod tests {
 
         cr2.set_stop_bits(StopLength::One);
         assert_eq!(cr2.0, 0b0);
+    }
+
+    #[test]
+    fn test_cr3_set_dma_mode() {
+        let mut cr3 = CR3(0);
+
+        cr3.set_dma_mode(DMAMode::Receive);
+        assert_eq!(cr3.0, 0b1 << 6);
+
+        cr3.set_dma_mode(DMAMode::Transmit);
+        assert_eq!(cr3.0, 0b1 << 7);
+
+        cr3.set_dma_mode(DMAMode::All);
+        assert_eq!(cr3.0, 0b11 << 6);
+
+        cr3.set_dma_mode(DMAMode::None);
+        assert_eq!(cr3.0, 0)
     }
 
     #[test]

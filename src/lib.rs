@@ -117,7 +117,7 @@ pub fn init() -> ! {
     init_clock();
     init_ticks();
     init_usart();
-
+    init_dma();
     unsafe { application_entry() };
 }
 
@@ -239,5 +239,10 @@ fn init_ticks() {
 fn init_usart() {
     #[cfg(feature="serial")]
     peripheral::usart::init();
+}
+
+fn init_dma() {
+    #[cfg(feature="dma")]
+    peripheral::dma::init();
 }
 

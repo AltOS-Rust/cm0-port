@@ -15,7 +15,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-//! This module is the highest level in the Usart heirarchy for implementing
+//! This module is the highest level in the Usart hierarchy for implementing
 //! the serial driver.
 //!
 //! Configuration for each of the two Usart registers, and each of the registers
@@ -29,8 +29,9 @@
 //! This module is also responsible for initial setup of the Usart register
 //! (Either Usart1 or Usart2).
 
+pub mod defs;
+
 mod control;
-mod defs;
 mod baudr;
 mod tdr;
 mod rdr;
@@ -49,7 +50,7 @@ use self::defs::*;
 use peripheral::{rcc, gpio};
 use interrupt;
 
-pub use self::control::{WordLength, Mode, Parity, StopLength, HardwareFlowControl};
+pub use self::control::{WordLength, Mode, Parity, StopLength, HardwareFlowControl, DMAMode};
 pub use self::baudr::BaudRate;
 
 /// Defines the wake/sleep channel for the TX buffer when full.
@@ -84,7 +85,7 @@ pub struct RawUsart {
     tdr: TDR,
 }
 
-/// Usart is the serial peripheral. This type is used to configure
+/// Usart is the serial peripheral. This struct is used to configure
 /// the serial peripheral to send and receive data through the serial bus.
 #[derive(Copy, Clone, Debug)]
 pub struct Usart(Volatile<RawUsart>);
@@ -199,6 +200,11 @@ impl RawUsart {
         self.cr2.set_stop_bits(length);
     }
 
+    /// Set the Usart DMA mode for transmit and receive configurations.
+    pub fn set_dma_mode(&mut self, dma_mode: DMAMode) {
+        self.cr3.set_dma_mode(dma_mode);
+    }
+
     /// Set hardware flow control mode.
     ///
     /// # Note
@@ -296,6 +302,7 @@ pub fn init() {
     usart2.disable_usart();
 
     usart2.set_word_length(WordLength::Eight);
+    usart2.set_dma_mode(DMAMode::All);
     usart2.set_mode(Mode::All);
     usart2.set_parity(Parity::None);
     usart2.set_hardware_flow_control(HardwareFlowControl::None);

@@ -15,26 +15,12 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-//! This module handles input and output through the serial port.
-//!
-//! It implements print formatting for debug and for non-debug purposes.
-//! Serial and DebugSerial types provide interfaces for printing characters
-//! to the serial port.
-//!
-//! This module contains implementations of helper macros for print and println.
+use peripheral::dma::{DMA, DMAChannel, DMA_TX_CHAN4PLUS};
+use altos_core::syscall;
 
-#[cfg(feature="serial")]
-mod serial;
+pub fn dma_tx(mut dma: DMA, chan: DMAChannel) {
+    dma.channel_transfer_complete_clear(chan);
+    dma[chan].disable_transmit_complete_interrupt();
 
-pub use io::serial::*;
-
-#[cfg(not(feature="serial"))]
-mod serial {
-    use core::fmt::Arguments;
-    #[no_mangle]
-    #[doc(hidden)]
-    pub fn debug_fmt(_args: Arguments) {
-        // Stub
-    }
+    syscall::sys_wake(DMA_TX_CHAN4PLUS);
 }
-

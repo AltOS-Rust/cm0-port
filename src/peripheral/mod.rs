@@ -20,6 +20,8 @@
 pub mod rcc;
 pub mod gpio;
 pub mod systick;
+#[cfg(feature="dma")]
+pub mod dma;
 #[cfg(feature="serial")]
 pub mod usart;
 

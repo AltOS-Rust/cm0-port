@@ -4,7 +4,7 @@ cargo-native = cargo
 cargo-target = xargo
 
 native-args = --features "test"
-test-args = --features "test serial svc minicom"
+test-args = --features "test serial svc minicom dma"
 target-args = --target=$(target)
 
 .PHONY: native native-release target clean

@@ -11,12 +11,12 @@ dependencies = [
 [[package]]
 name = "altos-macros"
 version = "0.1.0"
-source = "git+https://github.com/AltOS-Rust/altos-core#b04d61596199e30ff47035501172682d51c85075"
+source = "git+https://github.com/AltOS-Rust/altos-core#492367941b0017c8ba1dcdbb1f2773e74254647b"
 
 [[package]]
 name = "altos_core"
 version = "0.1.0"
-source = "git+https://github.com/AltOS-Rust/altos-core#b04d61596199e30ff47035501172682d51c85075"
+source = "git+https://github.com/AltOS-Rust/altos-core#492367941b0017c8ba1dcdbb1f2773e74254647b"
 dependencies = [
  "altos-macros 0.1.0 (git+https://github.com/AltOS-Rust/altos-core)",
  "cm0_atomic 0.1.0 (git+https://github.com/AltOS-Rust/cm0-atomic)",
@@ -36,7 +36,7 @@ source = "git+https://github.com/AltOS-Rust/cm0-atomic#cc0cfd61786e931535d03c962
 [[package]]
 name = "cm0_sync"
 version = "0.1.0"
-source = "git+https://github.com/AltOS-Rust/altos-core#b04d61596199e30ff47035501172682d51c85075"
+source = "git+https://github.com/AltOS-Rust/altos-core#492367941b0017c8ba1dcdbb1f2773e74254647b"
 dependencies = [
  "cm0_atomic 0.1.0 (git+https://github.com/AltOS-Rust/cm0-atomic)",
 ]
@@ -44,7 +44,7 @@ dependencies = [
 [[package]]
 name = "free_list_allocator"
 version = "0.1.0"
-source = "git+https://github.com/AltOS-Rust/altos-core#b04d61596199e30ff47035501172682d51c85075"
+source = "git+https://github.com/AltOS-Rust/altos-core#492367941b0017c8ba1dcdbb1f2773e74254647b"
 dependencies = [
  "altos-macros 0.1.0 (git+https://github.com/AltOS-Rust/altos-core)",
  "cm0_atomic 0.1.0 (git+https://github.com/AltOS-Rust/cm0-atomic)",

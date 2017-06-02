@@ -22,6 +22,8 @@
  * and not being used, or not listed at all.
  */
 
+#![allow(missing_docs)]
+
 // Base addresses for USART 1 and 2
 pub const USART1_ADDR: *const u32 = 0x4001_3800 as *const _;
 pub const USART2_ADDR: *const u32 = 0x4000_4400 as *const _;
@@ -84,6 +86,8 @@ pub const CR2_ADD1:      u32 = 0b1111 << 28; // This might need to change
 // ------------------------------------
 // USARTx - CR3 bit definitions
 pub const CR3_OFFSET: u32 = 0x08;
+pub const CR3_DMAR:   u32 = 0b1 << 6;
+pub const CR3_DMAT:   u32 = 0b1 << 7;
 pub const CR3_RTSE:   u32 = 0b1 << 8;
 pub const CR3_CTSE:   u32 = 0b1 << 9;
 
