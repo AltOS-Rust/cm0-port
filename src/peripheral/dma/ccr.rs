@@ -35,8 +35,6 @@ pub enum PeriphAndMemSize {
     Sixteen,
     /// Thirty-two bits.
     ThirtyTwo,
-    /// Reserved.
-    Reserved,
 }
 
 /// Defines the priority of the channel requests.
@@ -171,7 +169,6 @@ impl CCR {
             PeriphAndMemSize::Eight => 0,
             PeriphAndMemSize::Sixteen => CCR_PSIZE0,
             PeriphAndMemSize::ThirtyTwo => CCR_PSIZE1,
-            PeriphAndMemSize::Reserved => (CCR_PSIZE0 | CCR_PSIZE1),
         };
 
         self.0 &= !(CCR_PSIZE0 | CCR_PSIZE1);
@@ -190,7 +187,6 @@ impl CCR {
             PeriphAndMemSize::Eight => 0,
             PeriphAndMemSize::Sixteen => CCR_MSIZE0,
             PeriphAndMemSize::ThirtyTwo => CCR_MSIZE1,
-            PeriphAndMemSize::Reserved => (CCR_MSIZE0 | CCR_MSIZE1),
         };
 
         self.0 &= !(CCR_MSIZE0 | CCR_MSIZE1);
